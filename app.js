@@ -1,1409 +1,338 @@
-/* EmpresaTec - Sistema de Simulação Empresarial */
-/* JavaScript Revisado e Testado - Versão Estável */
+/* EmpresaTec - Versão revisada com sincronização remota (Firebase) + fallback local */
 
-// ===== SISTEMA PRINCIPAL ===== 
 const EmpresaTec = {
-    // Estado da aplicação
-    state: {
-        currentUser: null,
-        currentTeam: null,
-        currentScreen: 'loginScreen',
-        currentPhase: 1,
-        currentQuestion: 0,
-        userAnswers: [],
-        userProfile: null,
-        teacherPassword: 'professor2025'
-    },
-
-    // Dados do questionário
-    questionData: [
-        {
-            id: 1,
-            text: "Ao iniciar um novo projeto empresarial, sua primeira ação é:",
-            options: [
-                { text: "Definir a visão estratégica e objetivos de longo prazo", profile: "strategist" },
-                { text: "Pesquisar tecnologias inovadoras e oportunidades disruptivas", profile: "innovator" },
-                { text: "Mapear processos operacionais e recursos necessários", profile: "executor" },
-                { text: "Analisar dados de mercado e viabilidade financeira", profile: "analyst" },
-                { text: "Identificar stakeholders e estratégias de comunicação", profile: "communicator" }
-            ]
-        },
-        {
-            id: 2,
-            text: "Sua maior contribuição em uma equipe empresarial é:",
-            options: [
-                { text: "Liderar e tomar decisões estratégicas complexas", profile: "strategist" },
-                { text: "Desenvolver soluções criativas e inovadoras", profile: "innovator" },
-                { text: "Garantir execução eficiente e resultados práticos", profile: "executor" },
-                { text: "Fornecer análises precisas baseadas em dados", profile: "analyst" },
-                { text: "Facilitar comunicação e construir relacionamentos", profile: "communicator" }
-            ]
-        },
-        {
-            id: 3,
-            text: "Em uma reunião de negócios importante, você se destaca por:",
-            options: [
-                { text: "Apresentar visões de futuro e direcionamentos estratégicos", profile: "strategist" },
-                { text: "Propor ideias disruptivas e soluções tecnológicas", profile: "innovator" },
-                { text: "Focar na viabilidade e implementação prática", profile: "executor" },
-                { text: "Trazer dados concretos e análises fundamentadas", profile: "analyst" },
-                { text: "Mediar discussões e alinhar expectativas", profile: "communicator" }
-            ]
-        },
-        {
-            id: 4,
-            text: "Ao resolver problemas empresariais complexos, você prefere:",
-            options: [
-                { text: "Analisar impactos estratégicos e cenários futuros", profile: "strategist" },
-                { text: "Buscar soluções não convencionais e tecnológicas", profile: "innovator" },
-                { text: "Dividir em etapas executáveis e mensuráveis", profile: "executor" },
-                { text: "Utilizar modelos analíticos e dados históricos", profile: "analyst" },
-                { text: "Consultar stakeholders e buscar consenso", profile: "communicator" }
-            ]
-        },
-        {
-            id: 5,
-            text: "O que mais te motiva no ambiente empresarial?",
-            options: [
-                { text: "Definir rumos e impactar o futuro da organização", profile: "strategist" },
-                { text: "Criar produtos/serviços revolucionários", profile: "innovator" },
-                { text: "Ver resultados concretos e operações eficientes", profile: "executor" },
-                { text: "Descobrir insights valiosos através de análises", profile: "analyst" },
-                { text: "Construir relacionamentos e expandir networks", profile: "communicator" }
-            ]
-        },
-        {
-            id: 6,
-            text: "Em um cenário de crise empresarial, sua reação natural é:",
-            options: [
-                { text: "Reformular estratégias e redefinir prioridades", profile: "strategist" },
-                { text: "Buscar oportunidades de inovação e adaptação", profile: "innovator" },
-                { text: "Otimizar recursos e manter operações funcionando", profile: "executor" },
-                { text: "Analisar cenários de risco e quantificar perdas", profile: "analyst" },
-                { text: "Comunicar transparentemente e manter equipe unida", profile: "communicator" }
-            ]
-        },
-        {
-            id: 7,
-            text: "Sua área de interesse e expertise preferida é:",
-            options: [
-                { text: "Planejamento estratégico e governança corporativa", profile: "strategist" },
-                { text: "Pesquisa & desenvolvimento e novas tecnologias", profile: "innovator" },
-                { text: "Operações e gestão de processos empresariais", profile: "executor" },
-                { text: "Finanças e análise de performance empresarial", profile: "analyst" },
-                { text: "Marketing e relacionamento com stakeholders", profile: "communicator" }
-            ]
-        },
-        {
-            id: 8,
-            text: "Ao liderar uma equipe empresarial, você foca principalmente em:",
-            options: [
-                { text: "Alinhar visão estratégica e definir objetivos", profile: "strategist" },
-                { text: "Estimular criatividade e pensamento inovador", profile: "innovator" },
-                { text: "Estabelecer processos claros e metas alcançáveis", profile: "executor" },
-                { text: "Monitorar métricas e performance da equipe", profile: "analyst" },
-                { text: "Desenvolver talentos e facilitar comunicação", profile: "communicator" }
-            ]
-        },
-        {
-            id: 9,
-            text: "Para tomar decisões empresariais importantes, você considera principalmente:",
-            options: [
-                { text: "Alinhamento com visão estratégica de longo prazo", profile: "strategist" },
-                { text: "Potencial de diferenciação e inovação no mercado", profile: "innovator" },
-                { text: "Viabilidade operacional e recursos disponíveis", profile: "executor" },
-                { text: "ROI esperado e análise de riscos financeiros", profile: "analyst" },
-                { text: "Impacto nos stakeholders e imagem da empresa", profile: "communicator" }
-            ]
-        },
-        {
-            id: 10,
-            text: "Seu objetivo profissional ideal seria:",
-            options: [
-                { text: "Ser CEO de uma grande corporação multinacional", profile: "strategist" },
-                { text: "Criar uma startup unicórnio revolucionária", profile: "innovator" },
-                { text: "Ser reconhecido pela excelência operacional", profile: "executor" },
-                { text: "Ser autoridade em análise financeira e estratégica", profile: "analyst" },
-                { text: "Construir uma marca pessoal influente no mercado", profile: "communicator" }
-            ]
-        }
-    ],
-
-    // Perfis profissionais
-    profiles: {
-        strategist: {
-            name: "Estrategista Empresarial",
-            icon: "🎯",
-            description: "Especialista em planejamento estratégico e visão de longo prazo. Excelente para liderar decisões complexas."
-        },
-        innovator: {
-            name: "Inovador Tecnológico", 
-            icon: "💡",
-            description: "Criativo e visionário, especializado em desenvolvimento de produtos e soluções disruptivas."
-        },
-        executor: {
-            name: "Executor Operacional",
-            icon: "⚡",
-            description: "Prático e eficiente, especializado em operações e implementação. Transforma ideias em realidade."
-        },
-        analyst: {
-            name: "Analista Financeiro",
-            icon: "📊", 
-            description: "Orientado por dados, especializado em análises financeiras e inteligência de mercado."
-        },
-        communicator: {
-            name: "Comunicador Estratégico",
-            icon: "🎙️",
-            description: "Especialista em relacionamentos, marketing e vendas. Excelente comunicação e networking."
-        }
-    },
-
-    // ===== INICIALIZAÇÃO =====
-    init() {
-        console.log('🚀 Iniciando EmpresaTec');
-
-        try {
-            this.bindEvents();
-            this.loadState();
-            this.showScreen('loginScreen');
-            console.log('✅ Sistema inicializado com sucesso');
-        } catch (error) {
-            console.error('❌ Erro na inicialização:', error);
-            this.showAlert('Erro ao inicializar sistema: ' + error.message, 'error');
-        }
-    },
-
-    // ===== EVENT LISTENERS =====
-    bindEvents() {
-        console.log('🔗 Configurando event listeners');
-
-        // Login Form
-        const loginForm = document.getElementById('loginForm');
-        if (loginForm) {
-            loginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleLogin();
-            });
-        } else {
-            console.warn('⚠️ loginForm não encontrado');
-        }
-
-        // Teacher Button
-        const teacherBtn = document.getElementById('teacherBtn');
-        if (teacherBtn) {
-            teacherBtn.addEventListener('click', () => {
-                this.showScreen('teacherScreen');
-            });
-        }
-
-        // Teacher Form
-        const teacherForm = document.getElementById('teacherForm');
-        if (teacherForm) {
-            teacherForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleTeacherLogin();
-            });
-        }
-
-        // Back to Login
-        const backToLogin = document.getElementById('backToLogin');
-        if (backToLogin) {
-            backToLogin.addEventListener('click', () => {
-                this.showScreen('loginScreen');
-            });
-        }
-
-        // Logout buttons
-        const logoutButtons = ['logoutBtn', 'logoutSim', 'logoutTeacher'];
-        logoutButtons.forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) {
-                btn.addEventListener('click', () => {
-                    this.handleLogout();
-                });
-            }
-        });
-
-        // Create Team Form
-        const createTeamForm = document.getElementById('createTeamForm');
-        if (createTeamForm) {
-            createTeamForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.createTeam();
-            });
-        }
-
-        // Join Team Form
-        const joinTeamForm = document.getElementById('joinTeamForm');
-        if (joinTeamForm) {
-            joinTeamForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.joinTeam();
-            });
-        }
-
-        // Copy Button
-        const copyBtn = document.getElementById('copyBtn');
-        if (copyBtn) {
-            copyBtn.addEventListener('click', () => {
-                this.copyTeamCode();
-            });
-        }
-
-        // Start Button
-        const startBtn = document.getElementById('startBtn');
-        if (startBtn) {
-            startBtn.addEventListener('click', () => {
-                this.startSimulation();
-            });
-        }
-
-        // Questionnaire Navigation
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const finishBtn = document.getElementById('finishBtn');
-        const continueBtn = document.getElementById('continueBtn');
-
-        if (prevBtn) {
-            prevBtn.addEventListener('click', () => this.prevQuestion());
-        }
-        if (nextBtn) {
-            nextBtn.addEventListener('click', () => this.nextQuestion());
-        }
-        if (finishBtn) {
-            finishBtn.addEventListener('click', () => this.finishQuestionnaire());
-        }
-        if (continueBtn) {
-            continueBtn.addEventListener('click', () => this.goToPhase(2));
-        }
-
-        // Phase Navigation
-        const phaseButtons = ['nextPhase2', 'nextPhase3', 'nextPhase4', 'finishAct'];
-        phaseButtons.forEach((id, index) => {
-            const btn = document.getElementById(id);
-            if (btn) {
-                btn.addEventListener('click', () => {
-                    if (id === 'finishAct') {
-                        this.finishAct1();
-                    } else {
-                        this.goToPhase(index + 3);
-                    }
-                });
-            }
-        });
-
-        // Teacher Dashboard
-        const exportBtn = document.getElementById('exportBtn');
-        const resetBtn = document.getElementById('resetBtn');
-
-        if (exportBtn) {
-            exportBtn.addEventListener('click', () => this.exportData());
-        }
-        if (resetBtn) {
-            resetBtn.addEventListener('click', () => this.resetAllData());
-        }
-
-        // Alert Close
-        const alertClose = document.getElementById('alertClose');
-        if (alertClose) {
-            alertClose.addEventListener('click', () => {
-                this.hideAlert();
-            });
-        }
-
-        console.log('✅ Event listeners configurados');
-    },
-
-    // ===== NAVIGATION SYSTEM =====
-    showScreen(screenId) {
-        console.log(`📱 Mudando para tela: ${screenId}`);
-
-        try {
-            // Hide all screens
-            const screens = document.querySelectorAll('.screen');
-            screens.forEach(screen => {
-                screen.classList.remove('active');
-            });
-
-            // Show target screen
-            const targetScreen = document.getElementById(screenId);
-            if (targetScreen) {
-                targetScreen.classList.add('active');
-                this.state.currentScreen = screenId;
-                this.saveState();
-            } else {
-                console.error(`❌ Tela ${screenId} não encontrada`);
-            }
-        } catch (error) {
-            console.error('❌ Erro ao mudar tela:', error);
-        }
-    },
-
-    // ===== LOGIN SYSTEM ===== 
-    handleLogin() {
-        console.log('🔐 Processando login');
-
-        const email = document.getElementById('loginEmail')?.value?.trim();
-        const password = document.getElementById('loginPassword')?.value?.trim();
-
-        if (!email || !password) {
-            this.showAlert('Preencha todos os campos', 'error');
-            return;
-        }
-
-        if (!this.isValidEmail(email)) {
-            this.showAlert('Email inválido', 'error');
-            return;
-        }
-
-        try {
-            this.showLoading('Fazendo login...');
-
-            // Create user
-            this.state.currentUser = {
-                id: this.generateId(),
-                email: email,
-                name: email.split('@')[0]
-            };
-
-            console.log('👤 Usuário criado:', this.state.currentUser);
-
-            this.hideLoading();
-            this.showAlert('Login realizado com sucesso!', 'success');
-            this.showScreen('teamScreen');
-            this.updateUserInfo();
-
-        } catch (error) {
-            this.hideLoading();
-            console.error('❌ Erro no login:', error);
-            this.showAlert('Erro no login: ' + error.message, 'error');
-        }
-    },
-
-    handleTeacherLogin() {
-        console.log('👩‍🏫 Login do professor');
-
-        const password = document.getElementById('teacherPassword')?.value?.trim();
-
-        if (!password) {
-            this.showAlert('Digite a senha', 'error');
-            return;
-        }
-
-        if (password !== this.state.teacherPassword) {
-            this.showAlert('Senha incorreta!', 'error');
-            return;
-        }
-
-        try {
-            // Show teacher dashboard
-            const teacherLogin = document.querySelector('.teacher-login');
-            const teacherDashboard = document.getElementById('teacherDashboard');
-
-            if (teacherLogin) teacherLogin.style.display = 'none';
-            if (teacherDashboard) teacherDashboard.classList.remove('hidden');
-
-            this.loadTeacherDashboard();
-            this.showAlert('Bem-vindo ao painel administrativo!', 'success');
-
-        } catch (error) {
-            console.error('❌ Erro no login do professor:', error);
-            this.showAlert('Erro no login: ' + error.message, 'error');
-        }
-    },
-
-    handleLogout() {
-        if (!confirm('Deseja realmente sair?')) {
-            return;
-        }
-
-        try {
-            // Reset state
-            this.state = {
-                currentUser: null,
-                currentTeam: null,
-                currentScreen: 'loginScreen',
-                currentPhase: 1,
-                currentQuestion: 0,
-                userAnswers: [],
-                userProfile: null,
-                teacherPassword: 'professor2025'
-            };
-
-            // Clear storage
-            localStorage.removeItem('empresatec_state');
-
-            // Reset forms
-            const forms = document.querySelectorAll('form');
-            forms.forEach(form => form.reset());
-
-            // Hide teacher dashboard
-            const teacherDashboard = document.getElementById('teacherDashboard');
-            const teacherLogin = document.querySelector('.teacher-login');
-            if (teacherDashboard) teacherDashboard.classList.add('hidden');
-            if (teacherLogin) teacherLogin.style.display = 'block';
-
-            this.showScreen('loginScreen');
-            this.showAlert('Logout realizado com sucesso!', 'success');
-
-        } catch (error) {
-            console.error('❌ Erro no logout:', error);
-            this.showAlert('Erro no logout: ' + error.message, 'error');
-        }
-    },
-
-    // ===== TEAM MANAGEMENT =====
-    createTeam() {
-        console.log('🏗️ Criando equipe');
-
-        if (!this.state.currentUser) {
-            this.showAlert('Erro: usuário não autenticado', 'error');
-            return;
-        }
-
-        const companyName = document.getElementById('companyName')?.value?.trim();
-
-        if (!companyName) {
-            this.showAlert('Digite o nome da empresa', 'error');
-            return;
-        }
-
-        if (companyName.length < 3) {
-            this.showAlert('Nome deve ter pelo menos 3 caracteres', 'error');
-            return;
-        }
-
-        try {
-            this.showLoading('Criando empresa...');
-
-            const teamCode = this.generateTeamCode();
-            const newTeam = {
-                id: teamCode,
-                name: companyName,
-                code: teamCode,
-                leader: this.state.currentUser.id,
-                members: [{
-                    id: this.state.currentUser.id,
-                    name: this.state.currentUser.name,
-                    email: this.state.currentUser.email,
-                    isLeader: true,
-                    joinedAt: new Date().toISOString()
-                }],
-                createdAt: new Date().toISOString(),
-                status: 'active'
-            };
-
-            // Save team
-            this.saveTeam(newTeam);
-            this.state.currentTeam = newTeam;
-
-            this.hideLoading();
-            this.showAlert(`Empresa "${companyName}" criada! Código: ${teamCode}`, 'success');
-            this.showTeamStatus();
-
-            console.log('✅ Equipe criada:', newTeam);
-
-        } catch (error) {
-            this.hideLoading();
-            console.error('❌ Erro ao criar equipe:', error);
-            this.showAlert('Erro ao criar empresa: ' + error.message, 'error');
-        }
-    },
-
-    joinTeam() {
-        console.log('🤝 Entrando em equipe');
-
-        if (!this.state.currentUser) {
-            this.showAlert('Erro: usuário não autenticado', 'error');
-            return;
-        }
-
-        const teamCode = document.getElementById('teamCode')?.value?.trim()?.toUpperCase();
-
-        if (!teamCode) {
-            this.showAlert('Digite o código da empresa', 'error');
-            return;
-        }
-
-        if (teamCode.length !== 6) {
-            this.showAlert('Código deve ter 6 caracteres', 'error');
-            return;
-        }
-
-        try {
-            this.showLoading('Buscando empresa...');
-
-            const team = this.findTeam(teamCode);
-
-            if (!team) {
-                this.hideLoading();
-                this.showAlert('Empresa não encontrada', 'error');
-                return;
-            }
-
-            // Check if already member
-            const isMember = team.members.some(m => m.id === this.state.currentUser.id);
-            if (isMember) {
-                this.hideLoading();
-                this.state.currentTeam = team;
-                this.showAlert('Você já faz parte desta empresa!', 'info');
-                this.showTeamStatus();
-                return;
-            }
-
-            // Check member limit
-            if (team.members.length >= 6) {
-                this.hideLoading();
-                this.showAlert('Empresa já tem o máximo de 6 membros', 'error');
-                return;
-            }
-
-            // Add member
-            const newMember = {
-                id: this.state.currentUser.id,
-                name: this.state.currentUser.name,
-                email: this.state.currentUser.email,
-                isLeader: false,
-                joinedAt: new Date().toISOString()
-            };
-
-            team.members.push(newMember);
-            this.saveTeam(team);
-            this.state.currentTeam = team;
-
-            this.hideLoading();
-            this.showAlert(`Bem-vindo à ${team.name}!`, 'success');
-            this.showTeamStatus();
-
-        } catch (error) {
-            this.hideLoading();
-            console.error('❌ Erro ao entrar na equipe:', error);
-            this.showAlert('Erro ao entrar na empresa: ' + error.message, 'error');
-        }
-    },
-
-    showTeamStatus() {
-        console.log('📊 Mostrando status da equipe');
-
-        const teamStatus = document.getElementById('teamStatus');
-        const teamName = document.getElementById('teamName');
-        const teamCodeDisplay = document.getElementById('teamCodeDisplay');
-        const membersList = document.getElementById('membersList');
-        const startSection = document.getElementById('startSection');
-
-        if (!this.state.currentTeam) {
-            console.warn('⚠️ Nenhuma equipe para mostrar');
-            return;
-        }
-
-        try {
-            // Show team status
-            if (teamStatus) teamStatus.classList.remove('hidden');
-
-            // Team name
-            if (teamName) teamName.textContent = this.state.currentTeam.name;
-
-            // Team code
-            if (teamCodeDisplay) teamCodeDisplay.textContent = this.state.currentTeam.code;
-
-            // Members list
-            if (membersList) {
-                membersList.innerHTML = '';
-                this.state.currentTeam.members.forEach(member => {
-                    const memberDiv = document.createElement('div');
-                    memberDiv.className = `member ${member.isLeader ? 'leader' : ''}`;
-                    memberDiv.innerHTML = `
-                        <span class="member-name">${member.name} ${member.isLeader ? '👑' : ''}</span>
-                        <span class="member-role">${member.isLeader ? 'Líder' : 'Membro'}</span>
-                    `;
-                    membersList.appendChild(memberDiv);
-                });
-            }
-
-            // Start button (only for leader with min 2 members)
-            if (startSection) {
-                const isLeader = this.state.currentTeam.leader === this.state.currentUser.id;
-                const hasMinMembers = this.state.currentTeam.members.length >= 2;
-
-                if (isLeader && hasMinMembers) {
-                    startSection.classList.remove('hidden');
-                } else {
-                    startSection.classList.add('hidden');
-                }
-            }
-
-        } catch (error) {
-            console.error('❌ Erro ao mostrar status da equipe:', error);
-        }
-    },
-
-    copyTeamCode() {
-        const code = this.state.currentTeam?.code;
-        if (!code) return;
-
-        try {
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(code).then(() => {
-                    this.showAlert('Código copiado!', 'success');
-                });
-            } else {
-                // Fallback
-                const textArea = document.createElement('textarea');
-                textArea.value = code;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                this.showAlert('Código copiado!', 'success');
-            }
-        } catch (error) {
-            console.error('❌ Erro ao copiar código:', error);
-            this.showAlert('Erro ao copiar código', 'error');
-        }
-    },
-
-    // ===== SIMULATION SYSTEM =====
-    startSimulation() {
-        console.log('🎮 Iniciando simulação');
-
-        if (!this.state.currentTeam) {
-            this.showAlert('Erro: nenhuma equipe selecionada', 'error');
-            return;
-        }
-
-        try {
-            this.showScreen('simulationScreen');
-            this.updateSimulationInfo();
-            this.goToPhase(1);
-            this.loadQuestionnaire();
-
-        } catch (error) {
-            console.error('❌ Erro ao iniciar simulação:', error);
-            this.showAlert('Erro ao iniciar simulação: ' + error.message, 'error');
-        }
-    },
-
-    goToPhase(phaseNumber) {
-        console.log(`📋 Indo para fase ${phaseNumber}`);
-
-        try {
-            this.state.currentPhase = phaseNumber;
-
-            // Hide all phases
-            const phases = document.querySelectorAll('.phase-container');
-            phases.forEach(phase => {
-                phase.classList.remove('active');
-            });
-
-            // Show current phase
-            const currentPhase = document.getElementById(`phase${phaseNumber}`);
-            if (currentPhase) {
-                currentPhase.classList.add('active');
-            }
-
-            // Update progress
-            this.updateProgress();
-
-            // Load phase content
-            if (phaseNumber === 1) {
-                this.loadQuestionnaire();
-            }
-
-        } catch (error) {
-            console.error('❌ Erro ao mudar fase:', error);
-        }
-    },
-
-    updateProgress() {
-        const currentPhaseEl = document.getElementById('currentPhase');
-        const progressFill = document.getElementById('progressFill');
-
-        if (currentPhaseEl) {
-            currentPhaseEl.textContent = this.state.currentPhase;
-        }
-
-        if (progressFill) {
-            const progress = ((this.state.currentPhase - 1) / 4) * 100;
-            progressFill.style.width = `${progress}%`;
-        }
-    },
-
-    updateSimulationInfo() {
-        const simUserName = document.getElementById('simUserName');
-        const simTeamName = document.getElementById('simTeamName');
-
-        if (simUserName && this.state.currentUser) {
-            simUserName.textContent = `👤 ${this.state.currentUser.name}`;
-        }
-
-        if (simTeamName && this.state.currentTeam) {
-            simTeamName.textContent = `🏢 ${this.state.currentTeam.name}`;
-        }
-    },
-
-    updateUserInfo() {
-        const currentUserName = document.getElementById('currentUserName');
-
-        if (currentUserName && this.state.currentUser) {
-            currentUserName.textContent = `👤 ${this.state.currentUser.name}`;
-        }
-    },
-    // ===== QUESTIONNAIRE SYSTEM =====
-    loadQuestionnaire() {
-        console.log('🧠 Carregando questionário');
-
-        try {
-            this.state.currentQuestion = 0;
-            this.state.userAnswers = [];
-            this.displayQuestion();
-            this.updateQuestionProgress();
-
-        } catch (error) {
-            console.error('❌ Erro ao carregar questionário:', error);
-        }
-    },
-
-    displayQuestion() {
-        const question = this.questionData[this.state.currentQuestion];
-        if (!question) return;
-
-        try {
-            const questionText = document.getElementById('questionText');
-            const questionOptions = document.getElementById('questionOptions');
-
-            if (questionText) {
-                questionText.textContent = question.text;
-            }
-
-            if (questionOptions) {
-                questionOptions.innerHTML = '';
-
-                question.options.forEach((option, index) => {
-                    const button = document.createElement('button');
-                    button.className = 'question-option';
-                    button.textContent = option.text;
-                    button.dataset.index = index;
-
-                    // Check if already answered
-                    const currentAnswer = this.state.userAnswers[this.state.currentQuestion];
-                    if (currentAnswer && currentAnswer.optionIndex === index) {
-                        button.classList.add('selected');
-                    }
-
-                    button.addEventListener('click', () => {
-                        this.selectOption(index);
-                    });
-
-                    questionOptions.appendChild(button);
-                });
-            }
-
-            this.updateQuestionNavigation();
-
-        } catch (error) {
-            console.error('❌ Erro ao exibir pergunta:', error);
-        }
-    },
-
-    selectOption(optionIndex) {
-        console.log(`Selecionada opção ${optionIndex}`);
-
-        try {
-            const question = this.questionData[this.state.currentQuestion];
-            const option = question.options[optionIndex];
-
-            // Save answer
-            this.state.userAnswers[this.state.currentQuestion] = {
-                questionId: question.id,
-                optionIndex: optionIndex,
-                option: option
-            };
-
-            // Update UI
-            const buttons = document.querySelectorAll('.question-option');
-            buttons.forEach(btn => btn.classList.remove('selected'));
-
-            const selectedButton = document.querySelector(`[data-index="${optionIndex}"]`);
-            if (selectedButton) {
-                selectedButton.classList.add('selected');
-            }
-
-            this.updateQuestionNavigation();
-            this.saveState();
-
-            // Auto advance if not last question
-            if (this.state.currentQuestion < this.questionData.length - 1) {
-                setTimeout(() => {
-                    this.nextQuestion();
-                }, 800);
-            }
-
-        } catch (error) {
-            console.error('❌ Erro ao selecionar opção:', error);
-        }
-    },
-
-    updateQuestionProgress() {
-        const currentQ = document.getElementById('currentQ');
-        const totalQ = document.getElementById('totalQ');
-        const miniProgressFill = document.getElementById('miniProgressFill');
-
-        if (currentQ) {
-            currentQ.textContent = this.state.currentQuestion + 1;
-        }
-
-        if (totalQ) {
-            totalQ.textContent = this.questionData.length;
-        }
-
-        if (miniProgressFill) {
-            const progress = ((this.state.currentQuestion + 1) / this.questionData.length) * 100;
-            miniProgressFill.style.width = `${progress}%`;
-        }
-    },
-
-    updateQuestionNavigation() {
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const finishBtn = document.getElementById('finishBtn');
-
-        // Previous button
-        if (prevBtn) {
-            prevBtn.disabled = this.state.currentQuestion === 0;
-        }
-
-        // Check if current question is answered
-        const isAnswered = this.state.userAnswers[this.state.currentQuestion];
-
-        // Next button
-        if (nextBtn) {
-            nextBtn.disabled = !isAnswered;
-        }
-
-        // Finish button (show only on last question if all answered)
-        if (finishBtn) {
-            const allAnswered = this.state.userAnswers.filter(a => a).length === this.questionData.length;
-            const isLastQuestion = this.state.currentQuestion === this.questionData.length - 1;
-
-            if (isLastQuestion && allAnswered) {
-                finishBtn.classList.remove('hidden');
-                if (nextBtn) nextBtn.classList.add('hidden');
-            } else {
-                finishBtn.classList.add('hidden');
-                if (nextBtn) nextBtn.classList.remove('hidden');
-            }
-        }
-    },
-
-    nextQuestion() {
-        if (this.state.currentQuestion < this.questionData.length - 1) {
-            this.state.currentQuestion++;
-            this.displayQuestion();
-            this.updateQuestionProgress();
-        }
-    },
-
-    prevQuestion() {
-        if (this.state.currentQuestion > 0) {
-            this.state.currentQuestion--;
-            this.displayQuestion();
-            this.updateQuestionProgress();
-        }
-    },
-
-    finishQuestionnaire() {
-        console.log('🎯 Finalizando questionário');
-
-        try {
-            const allAnswered = this.state.userAnswers.filter(a => a).length === this.questionData.length;
-
-            if (!allAnswered) {
-                this.showAlert('Responda todas as perguntas primeiro', 'error');
-                return;
-            }
-
-            this.showLoading('Analisando perfil...');
-
-            const profile = this.calculateProfile();
-            this.state.userProfile = profile;
-
-            this.displayProfileResult(profile);
-
-            this.hideLoading();
-            this.showAlert(`Seu perfil: ${profile.name}!`, 'success');
-
-        } catch (error) {
-            this.hideLoading();
-            console.error('❌ Erro ao finalizar questionário:', error);
-            this.showAlert('Erro ao processar perfil: ' + error.message, 'error');
-        }
-    },
-
-    calculateProfile() {
-        const scores = {
-            strategist: 0,
-            innovator: 0,
-            executor: 0,
-            analyst: 0,
-            communicator: 0
-        };
-
-        // Count profile occurrences
-        this.state.userAnswers.forEach(answer => {
-            if (answer && answer.option && answer.option.profile) {
-                scores[answer.option.profile]++;
-            }
-        });
-
-        // Find dominant profile
-        const dominantProfile = Object.keys(scores).reduce((a, b) => 
-            scores[a] > scores[b] ? a : b
-        );
-
-        return {
-            type: dominantProfile,
-            ...this.profiles[dominantProfile],
-            scores: scores
-        };
-    },
-
-    displayProfileResult(profile) {
-        try {
-            const profileResult = document.getElementById('profileResult');
-            const profileIcon = document.getElementById('profileIcon');
-            const profileName = document.getElementById('profileName');
-            const profileDesc = document.getElementById('profileDesc');
-            const profileStrengths = document.getElementById('profileStrengths');
-
-            if (profileResult) profileResult.classList.remove('hidden');
-            if (profileIcon) profileIcon.textContent = profile.icon;
-            if (profileName) profileName.textContent = profile.name;
-            if (profileDesc) profileDesc.textContent = profile.description;
-
-            if (profileStrengths) {
-                profileStrengths.innerHTML = '';
-
-                // Add some example strengths based on profile
-                const strengths = this.getProfileStrengths(profile.type);
-                strengths.forEach(strength => {
-                    const span = document.createElement('span');
-                    span.className = 'strength-tag';
-                    span.textContent = strength;
-                    profileStrengths.appendChild(span);
-                });
-            }
-
-        } catch (error) {
-            console.error('❌ Erro ao exibir resultado do perfil:', error);
-        }
-    },
-
-    getProfileStrengths(profileType) {
-        const strengthsMap = {
-            strategist: ['Planejamento', 'Liderança', 'Visão de Futuro', 'Análise'],
-            innovator: ['Criatividade', 'Tecnologia', 'Inovação', 'Desenvolvimento'],
-            executor: ['Execução', 'Eficiência', 'Implementação', 'Resultados'],
-            analyst: ['Análise', 'Dados', 'Métricas', 'Finanças'],
-            communicator: ['Comunicação', 'Relacionamento', 'Marketing', 'Networking']
-        };
-
-        return strengthsMap[profileType] || ['Habilidades Gerais'];
-    },
-
-    finishAct1() {
-        console.log('🎉 Finalizando Ato 1');
-
-        try {
-            this.showAlert('Ato 1 concluído com sucesso!', 'success');
-
-            // Here you would normally save the completion status
-            if (this.state.currentTeam) {
-                this.state.currentTeam.act1Completed = true;
-                this.saveTeam(this.state.currentTeam);
-            }
-
-            // For now, just return to team screen
-            setTimeout(() => {
-                this.showScreen('teamScreen');
-            }, 2000);
-
-        } catch (error) {
-            console.error('❌ Erro ao finalizar Ato 1:', error);
-            this.showAlert('Erro ao finalizar Ato 1: ' + error.message, 'error');
-        }
-    },
-
-    // ===== TEACHER DASHBOARD =====
-    loadTeacherDashboard() {
-        console.log('👩‍🏫 Carregando dashboard do professor');
-
-        try {
-            this.updateTeacherStats();
-            this.loadTeamsList();
-
-        } catch (error) {
-            console.error('❌ Erro ao carregar dashboard:', error);
-        }
-    },
-
-    updateTeacherStats() {
-        const totalTeams = document.getElementById('totalTeams');
-        const totalStudents = document.getElementById('totalStudents');
-
-        const teams = this.getAllTeams();
-        const teamCount = teams.length;
-        const studentCount = teams.reduce((sum, team) => sum + team.members.length, 0);
-
-        if (totalTeams) totalTeams.textContent = teamCount;
-        if (totalStudents) totalStudents.textContent = studentCount;
-    },
-
-    loadTeamsList() {
-        const teamsList = document.getElementById('teamsList');
-        if (!teamsList) return;
-
-        const teams = this.getAllTeams();
-
-        if (teams.length === 0) {
-            teamsList.innerHTML = '<div class="no-teams">📝 Nenhuma equipe criada ainda</div>';
-            return;
-        }
-
-        teamsList.innerHTML = '';
-
-        teams.forEach(team => {
-            const teamDiv = document.createElement('div');
-            teamDiv.className = 'team-item';
-            teamDiv.innerHTML = `
-                <div class="team-header">
-                    <h4>${team.name}</h4>
-                    <span class="team-code">Código: ${team.code}</span>
-                </div>
-                <div class="team-info">
-                    <span>👥 ${team.members.length} membros</span>
-                    <span>📅 ${this.formatDate(team.createdAt)}</span>
-                </div>
-                <div class="team-actions">
-                    <button class="btn btn--xs btn--outline" onclick="EmpresaTec.viewTeam('${team.code}')">
-                        👁️ Ver
-                    </button>
-                    <button class="btn btn--xs btn--danger" onclick="EmpresaTec.deleteTeam('${team.code}')">
-                        🗑️ Excluir
-                    </button>
-                </div>
-            `;
-            teamsList.appendChild(teamDiv);
-        });
-    },
-
-    viewTeam(teamCode) {
-        const team = this.findTeam(teamCode);
-        if (!team) {
-            this.showAlert('Equipe não encontrada', 'error');
-            return;
-        }
-
-        const membersList = team.members.map(m => 
-            `• ${m.name} ${m.isLeader ? '(Líder)' : ''}`
-        ).join('\n');
-
-        const info = `🏢 Empresa: ${team.name}
-🎯 Código: ${team.code}
-👥 Membros: ${team.members.length}
-📅 Criada: ${this.formatDate(team.createdAt)}
-
-Membros:
-${membersList}`;
-
-        alert(info);
-    },
-
-    deleteTeam(teamCode) {
-        if (!confirm(`Excluir a empresa ${teamCode}? Esta ação não pode ser desfeita.`)) {
-            return;
-        }
-
-        try {
-            const teams = this.getAllTeams();
-            const updatedTeams = teams.filter(team => team.code !== teamCode);
-            localStorage.setItem('empresatec_teams', JSON.stringify(updatedTeams));
-
-            this.loadTeamsList();
-            this.updateTeacherStats();
-            this.showAlert(`Empresa ${teamCode} excluída com sucesso!`, 'success');
-
-        } catch (error) {
-            console.error('❌ Erro ao excluir equipe:', error);
-            this.showAlert('Erro ao excluir equipe: ' + error.message, 'error');
-        }
-    },
-
-    exportData() {
-        try {
-            const teams = this.getAllTeams();
-            const data = {
-                timestamp: new Date().toISOString(),
-                teams: teams,
-                totalTeams: teams.length,
-                totalStudents: teams.reduce((sum, team) => sum + team.members.length, 0)
-            };
-
-            const dataStr = JSON.stringify(data, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `empresatec_export_${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-
-            this.showAlert('Dados exportados com sucesso!', 'success');
-
-        } catch (error) {
-            console.error('❌ Erro ao exportar:', error);
-            this.showAlert('Erro ao exportar dados: ' + error.message, 'error');
-        }
-    },
-
-    resetAllData() {
-        if (!confirm('⚠️ ATENÇÃO: Isto irá apagar TODOS os dados! Continuar?')) {
-            return;
-        }
-
-        if (!confirm('🚨 CONFIRMAÇÃO FINAL: Todos os dados serão perdidos!')) {
-            return;
-        }
-
-        try {
-            localStorage.removeItem('empresatec_teams');
-            localStorage.removeItem('empresatec_state');
-
-            this.loadTeamsList();
-            this.updateTeacherStats();
-
-            this.showAlert('🎯 Todos os dados foram resetados!', 'success');
-
-        } catch (error) {
-            console.error('❌ Erro ao resetar:', error);
-            this.showAlert('Erro ao resetar dados: ' + error.message, 'error');
-        }
-    },
-
-    // ===== STORAGE FUNCTIONS =====
-    saveTeam(team) {
-        try {
-            const teams = this.getAllTeams();
-            const existingIndex = teams.findIndex(t => t.code === team.code);
-
-            if (existingIndex >= 0) {
-                teams[existingIndex] = team;
-            } else {
-                teams.push(team);
-            }
-
-            localStorage.setItem('empresatec_teams', JSON.stringify(teams));
-            console.log(`💾 Equipe ${team.code} salva`);
-
-        } catch (error) {
-            console.error('❌ Erro ao salvar equipe:', error);
-            throw error;
-        }
-    },
-
-    findTeam(teamCode) {
-        try {
-            const teams = this.getAllTeams();
-            return teams.find(team => team.code === teamCode) || null;
-
-        } catch (error) {
-            console.error('❌ Erro ao buscar equipe:', error);
-            return null;
-        }
-    },
-
-    getAllTeams() {
-        try {
-            const teamsData = localStorage.getItem('empresatec_teams');
-            return teamsData ? JSON.parse(teamsData) : [];
-
-        } catch (error) {
-            console.error('❌ Erro ao carregar equipes:', error);
-            return [];
-        }
-    },
-
-    saveState() {
-        try {
-            const stateToSave = {
-                ...this.state,
-                // Don't save sensitive data
-                teacherPassword: undefined
-            };
-            localStorage.setItem('empresatec_state', JSON.stringify(stateToSave));
-
-        } catch (error) {
-            console.error('❌ Erro ao salvar estado:', error);
-        }
-    },
-
-    loadState() {
-        try {
-            const savedState = localStorage.getItem('empresatec_state');
-            if (savedState) {
-                const parsedState = JSON.parse(savedState);
-                // Restore state but keep original teacher password
-                const originalPassword = this.state.teacherPassword;
-                Object.assign(this.state, parsedState);
-                this.state.teacherPassword = originalPassword;
-
-                console.log('📂 Estado carregado');
-            }
-
-        } catch (error) {
-            console.error('❌ Erro ao carregar estado:', error);
-        }
-    },
-
-    // ===== UTILITY FUNCTIONS =====
-    generateId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
-    },
-
-    generateTeamCode() {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let result = '';
-        for (let i = 0; i < 6; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return result;
-    },
-
-    isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    },
-
-    formatDate(dateString) {
-        try {
-            const date = new Date(dateString);
-            return date.toLocaleString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        } catch (error) {
-            return 'Data inválida';
-        }
-    },
-
-    // ===== UI HELPERS =====
-    showAlert(message, type = 'info') {
-        console.log(`${type.toUpperCase()}: ${message}`);
-
-        const alertSystem = document.getElementById('alertSystem');
-        const alertContent = document.getElementById('alertContent');
-        const alertIcon = document.getElementById('alertIcon');
-        const alertMessage = document.getElementById('alertMessage');
-
-        if (!alertSystem || !alertContent || !alertIcon || !alertMessage) {
-            // Fallback to browser alert
-            alert(message);
-            return;
-        }
-
-        try {
-            // Icons by type
-            const icons = {
-                success: '✅',
-                error: '❌',
-                warning: '⚠️',
-                info: 'ℹ️'
-            };
-
-            // Update content
-            alertIcon.textContent = icons[type] || icons.info;
-            alertMessage.textContent = message;
-            alertContent.className = `alert-content ${type}`;
-
-            // Show alert
-            alertSystem.classList.remove('hidden');
-
-            // Auto hide after 5 seconds
-            setTimeout(() => {
-                this.hideAlert();
-            }, 5000);
-
-        } catch (error) {
-            console.error('❌ Erro ao mostrar alerta:', error);
-            alert(message); // Fallback
-        }
-    },
-
-    hideAlert() {
-        const alertSystem = document.getElementById('alertSystem');
-        if (alertSystem) {
-            alertSystem.classList.add('hidden');
-        }
-    },
-
-    showLoading(message = 'Carregando...') {
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const loadingText = document.getElementById('loadingText');
-
-        if (loadingOverlay) loadingOverlay.classList.remove('hidden');
-        if (loadingText) loadingText.textContent = message;
-
-        console.log(`⏳ ${message}`);
-    },
-
-    hideLoading() {
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        if (loadingOverlay) loadingOverlay.classList.add('hidden');
-
-        console.log('✅ Loading concluído');
-    },
-
-    // ===== DEBUG HELPERS =====
-    debug() {
-        console.log('🐛 === DEBUG EMPRESATEC ===');
-        console.log('Estado atual:', this.state);
-        console.log('Equipes:', this.getAllTeams());
-
-        return {
-            state: this.state,
-            teams: this.getAllTeams()
-        };
-    },
-
-    clearStorage() {
-        if (confirm('Limpar todos os dados salvos?')) {
-            localStorage.clear();
-            location.reload();
-        }
-    }
-};
-
-// ===== AUTO INITIALIZATION =====
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 EmpresaTec - Sistema Empresarial Educacional');
-    console.log('📅 Data:', new Date().toLocaleString('pt-BR'));
+  state: {
+    currentUser: null,
+    currentTeam: null,
+    currentScreen: 'loginScreen',
+    currentPhase: 1,
+    currentQuestion: 0,
+    userAnswers: [],
+    userProfile: null,
+    teacherPassword: 'professor2025',
+    online: false
+  },
+
+  async init() {
+    this.bindEvents();
+    this.loadState();
+    await this.checkOnline();
+    this.showScreen(this.state.currentScreen || 'loginScreen');
+    console.log('✅ Sistema pronto');
+  },
+
+  async checkOnline() {
+    try {
+      this.state.online = !!window.FB && !!window.FB.db;
+      if (this.state.online) console.log('🌐 Modo online (Firebase)');
+      else console.log('💾 Modo local (sem Firebase)');
+    } catch { this.state.online = false; }
+  },
+
+  // ========= Eventos =========
+  bindEvents() {
+    const $ = (id)=>document.getElementById(id);
+    $('loginForm')?.addEventListener('submit', e=>{e.preventDefault();this.handleLogin();});
+    $('teacherBtn')?.addEventListener('click', ()=>this.showScreen('teacherScreen'));
+    $('teacherForm')?.addEventListener('submit', e=>{e.preventDefault();this.handleTeacherLogin();});
+    $('backToLogin')?.addEventListener('click', ()=>this.showScreen('loginScreen'));
+    ;['logoutBtn','logoutSim','logoutTeacher'].forEach(id=>$(id)?.addEventListener('click', ()=>this.handleLogout()));
+    $('createTeamForm')?.addEventListener('submit', e=>{e.preventDefault();this.createTeam();});
+    $('joinTeamForm')?.addEventListener('submit', e=>{e.preventDefault();this.joinTeam();});
+    $('copyBtn')?.addEventListener('click', ()=>this.copyTeamCode());
+    $('startBtn')?.addEventListener('click', ()=>this.startSimulation());
+
+    // Questionário
+    $('prevBtn')?.addEventListener('click', ()=>this.prevQuestion());
+    $('nextBtn')?.addEventListener('click', ()=>this.nextQuestion());
+    $('finishBtn')?.addEventListener('click', ()=>this.finishQuestionnaire());
+    $('continueBtn')?.addEventListener('click', ()=>this.goToPhase(2));
+
+    // Fases
+    $('nextPhase2')?.addEventListener('click', ()=>this.goToPhase(3));
+    $('nextPhase3')?.addEventListener('click', ()=>this.goToPhase(4));
+    $('nextPhase4')?.addEventListener('click', ()=>this.goToPhase(5));
+    $('finishAct')?.addEventListener('click', ()=>this.finishAct1());
+
+    // Professor
+    $('exportBtn')?.addEventListener('click', ()=>this.exportData());
+    $('resetBtn')?.addEventListener('click', ()=>this.resetAllData());
+
+    // Alert close
+    $('alertClose')?.addEventListener('click', ()=>this.hideAlert());
+  },
+
+  // ========= Telas =========
+  showScreen(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    const el = document.getElementById(id);
+    if (el){ el.classList.add('active'); this.state.currentScreen = id; this.saveState(); }
+  },
+
+  // ========= Login =========
+  async handleLogin(){
+    const email = document.getElementById('loginEmail')?.value?.trim();
+    const pass  = document.getElementById('loginPassword')?.value?.trim();
+    if(!email||!pass) return this.showAlert('Preencha todos os campos','error');
+    if(!this.isValidEmail(email)) return this.showAlert('Email inválido','error');
 
     try {
-        EmpresaTec.init();
+      this.showLoading('Entrando...');
+      // Define usuário localmente SEMPRE
+      this.state.currentUser = { id: this.uid(), email, name: email.split('@')[0] };
 
-        // Make available globally for debugging
-        window.EmpresaTec = EmpresaTec;
-        window.debug = EmpresaTec.debug.bind(EmpresaTec);
-
-        console.log('✅ Sistema inicializado com sucesso!');
-        console.log('🔧 Para debug, use: debug() no console');
-
-    } catch (error) {
-        console.error('❌ Erro crítico na inicialização:', error);
-        alert('Erro ao inicializar sistema. Verifique o console para mais detalhes.');
+      // Se online, autentica (cria se não existir)
+      if (this.state.online){
+        try { await window.FB.signIn(email, pass); }
+        catch(e){ if(e?.code?.includes('user-not-found')) await window.FB.signUp(email, pass); }
+      }
+      this.hideLoading();
+      this.showScreen('teamScreen');
+      this.updateUserInfo();
+      this.showAlert('Login ok!','success');
+    } catch(e){
+      this.hideLoading();
+      this.showAlert('Erro no login: '+e.message,'error');
     }
-});
+  },
 
-// Make globally available
-window.EmpresaTec = EmpresaTec;
+  handleTeacherLogin(){
+    const p = document.getElementById('teacherPassword')?.value?.trim();
+    if(!p) return this.showAlert('Digite a senha','error');
+    if(p!==this.state.teacherPassword) return this.showAlert('Senha incorreta','error');
+    document.querySelector('.teacher-login').style.display='none';
+    document.getElementById('teacherDashboard').classList.remove('hidden');
+    this.loadTeacherDashboard();
+    this.showAlert('Bem-vindo ao painel!','success');
+  },
+
+  handleLogout(){
+    if(!confirm('Deseja sair?')) return;
+    localStorage.removeItem('empresatec_state');
+    this.state = { currentUser:null,currentTeam:null,currentScreen:'loginScreen',currentPhase:1,currentQuestion:0,userAnswers:[],userProfile:null,teacherPassword:'professor2025',online:this.state.online };
+    const tl = document.querySelector('.teacher-login');
+    const td = document.getElementById('teacherDashboard');
+    if (td) td.classList.add('hidden');
+    if (tl) tl.style.display='block';
+    this.showScreen('loginScreen');
+    this.showAlert('Logout realizado','success');
+  },
+
+  // ========= Equipes (com sincronização) =========
+  normalizeCode(code){ return (code||'').toString().trim().toUpperCase(); }
+
+  async createTeam(){
+    if(!this.state.currentUser) return this.showAlert('Usuário não autenticado','error');
+    const name = document.getElementById('companyName')?.value?.trim();
+    if(!name||name.length<3) return this.showAlert('Nome da empresa inválido','error');
+
+    try{
+      this.showLoading('Criando empresa...');
+      // Gera código único (checa conflito remoto se online)
+      let code;
+      for(let i=0;i<10;i++){
+        code = this.teamCode();
+        if (this.state.online){
+          const exists = await this.getTeamRemote(code);
+          if (!exists) break; // não existe, pode usar
+        } else {
+          const existsLocal = this.getAllTeams().some(t=>t.code===code);
+          if (!existsLocal) break;
+        }
+      }
+
+      const team = {
+        id: code, code,
+        name,
+        leader: this.state.currentUser.id,
+        members: [{ id:this.state.currentUser.id, name:this.state.currentUser.name, email:this.state.currentUser.email, isLeader:true, joinedAt:new Date().toISOString() }],
+        createdAt: new Date().toISOString(),
+        lastUpdated: new Date().toISOString(),
+        status: 'active'
+      };
+
+      // Salva remoto se possível, sempre salva local como cache
+      await this.saveTeam(team);
+      this.state.currentTeam = team;
+      this.hideLoading();
+      this.showTeamStatus();
+      this.showAlert(`Empresa "${name}" criada! Código: ${code}`,'success');
+    }catch(e){
+      this.hideLoading();
+      this.showAlert('Erro ao criar empresa: '+e.message,'error');
+    }
+  },
+
+  async joinTeam(){
+    if(!this.state.currentUser) return this.showAlert('Usuário não autenticado','error');
+    const raw = document.getElementById('teamCode')?.value;
+    const code = this.normalizeCode(raw);
+    if(!code || code.length!==6) return this.showAlert('Código deve ter 6 caracteres','error');
+
+    try{
+      this.showLoading('Buscando empresa...');
+      // Busca remoto primeiro (se online), depois local
+      let team = await this.getTeamRemote(code);
+      if (!team) team = this.findTeamLocal(code);
+      if (!team){ this.hideLoading(); return this.showAlert('Empresa não encontrada','error'); }
+
+      // Já é membro?
+      if (team.members.some(m=>m.id===this.state.currentUser.id)){
+        this.state.currentTeam = team; this.hideLoading(); this.showTeamStatus(); return this.showAlert('Você já está nesta empresa','info');
+      }
+
+      // Limite
+      if ((team.members?.length||0) >= 6){ this.hideLoading(); return this.showAlert('Empresa já tem 6 membros','error'); }
+
+      // Adiciona e salva
+      const member = { id:this.state.currentUser.id, name:this.state.currentUser.name, email:this.state.currentUser.email, isLeader:false, joinedAt:new Date().toISOString() };
+      team.members.push(member);
+      team.lastUpdated = new Date().toISOString();
+      await this.saveTeam(team);
+      this.state.currentTeam = team;
+      this.hideLoading();
+      this.showTeamStatus();
+      this.showAlert(`Bem-vindo à ${team.name}!`,'success');
+    }catch(e){
+      this.hideLoading();
+      this.showAlert('Erro ao entrar na empresa: '+e.message,'error');
+    }
+  },
+
+  async saveTeam(team){
+    // Salva remoto (quando online) e cache local (sempre)
+    try{
+      if (this.state.online){
+        const ref = window.FB.doc('teams', team.code);
+        await window.FB.set(ref, team);
+      }
+    }catch(e){ console.warn('⚠️ Falha remoto, usando cache local:', e.message); }
+
+    const teams = this.getAllTeams();
+    const i = teams.findIndex(t=>t.code===team.code);
+    if (i>=0) teams[i] = team; else teams.push(team);
+    localStorage.setItem('empresatec_teams', JSON.stringify(teams));
+  },
+
+  async getTeamRemote(code){
+    try{
+      if (!this.state.online) return null;
+      const ref = window.FB.doc('teams', this.normalizeCode(code));
+      const snap = await window.FB.get(ref);
+      return snap.exists ? snap.data() : null;
+    }catch(e){ console.warn('⚠️ getTeamRemote:', e.message); return null; }
+  },
+
+  getAllTeams(){
+    try{ return JSON.parse(localStorage.getItem('empresatec_teams')||'[]'); }
+    catch{ return []; }
+  },
+
+  findTeamLocal(code){ return this.getAllTeams().find(t=>t.code===this.normalizeCode(code))||null; },
+
+  showTeamStatus(){
+    const t = this.state.currentTeam; if (!t) return;
+    const $(id)=>document.getElementById(id);
+  },
+
+  showTeamStatus(){
+    const t = this.state.currentTeam; if (!t) return;
+    const $ = (id)=>document.getElementById(id);
+    $('teamStatus')?.classList.remove('hidden');
+    $('teamName').textContent = t.name;
+    $('teamCodeDisplay').textContent = t.code;
+    const list = $('membersList');
+    if (list){
+      list.innerHTML='';
+      t.members.forEach(m=>{
+        const d = document.createElement('div');
+        d.className = `member ${m.isLeader?'leader':''}`;
+        d.innerHTML = `<span class="member-name">${m.name} ${m.isLeader?'👑':''}</span><span class="member-role">${m.isLeader?'Líder':'Membro'}</span>`;
+        list.appendChild(d);
+      })
+    }
+    const isLeader = t.leader===this.state.currentUser?.id;
+    const hasMin = (t.members?.length||0)>=2;
+    const ss = document.getElementById('startSection');
+    if (ss){ if (isLeader && hasMin) ss.classList.remove('hidden'); else ss.classList.add('hidden'); }
+  },
+
+  copyTeamCode(){ const c=this.state.currentTeam?.code; if(!c) return; navigator.clipboard?.writeText(c).then(()=>this.showAlert('Código copiado!','success')); },
+
+  // ========= Simulação =========
+  startSimulation(){ if(!this.state.currentTeam) return this.showAlert('Nenhuma equipe','error'); this.showScreen('simulationScreen'); this.updateSimulationInfo(); this.goToPhase(1); this.loadQuestionnaire(); },
+  updateSimulationInfo(){ const u=this.state.currentUser,t=this.state.currentTeam; const su=document.getElementById('simUserName'), st=document.getElementById('simTeamName'); if(su&&u) su.textContent='👤 '+u.name; if(st&&t) st.textContent='🏢 '+t.name; },
+  goToPhase(n){ this.state.currentPhase=n; document.querySelectorAll('.phase-container').forEach(p=>p.classList.remove('active')); document.getElementById(`phase${n}`)?.classList.add('active'); const pf=document.getElementById('progressFill'); if(pf) pf.style.width = (((n-1)/4)*100)+'%'; const cp=document.getElementById('currentPhase'); if(cp) cp.textContent=n; },
+
+  // ========= Questionário =========
+  questions: [
+    {id:1,text:'Ao iniciar um novo projeto empresarial, sua primeira ação é:',o:[['Definir visão estratégica','strategist'],['Pesquisar tecnologias inovadoras','innovator'],['Mapear processos e recursos','executor'],['Analisar dados de mercado','analyst'],['Identificar stakeholders','communicator']]},
+    {id:2,text:'Sua maior contribuição em uma equipe empresarial é:',o:[['Liderar decisões estratégicas','strategist'],['Criar soluções inovadoras','innovator'],['Executar com eficiência','executor'],['Trazer análises precisas','analyst'],['Facilitar comunicação','communicator']]},
+    {id:3,text:'Em uma reunião importante, você se destaca por:',o:[['Visão de futuro','strategist'],['Ideias disruptivas','innovator'],['Viabilidade prática','executor'],['Dados concretos','analyst'],['Mediação e alinhamento','communicator']]},
+    {id:4,text:'Ao resolver problemas complexos, você prefere:',o:[['Analisar cenários futuros','strategist'],['Soluções tecnológicas','innovator'],['Etapas executáveis','executor'],['Modelos analíticos','analyst'],['Buscar consenso','communicator']]},
+    {id:5,text:'O que mais motiva no ambiente empresarial?',o:[['Definir rumos','strategist'],['Criar algo novo','innovator'],['Ver resultados','executor'],['Descobrir insights','analyst'],['Construir relacionamentos','communicator']]},
+    {id:6,text:'Em uma crise, sua reação natural é:',o:[['Redefinir prioridades','strategist'],['Buscar inovação','innovator'],['Otimizar recursos','executor'],['Analisar riscos','analyst'],['Comunicar e unir equipe','communicator']]},
+    {id:7,text:'Sua área preferida é:',o:[['Estratégia e governança','strategist'],['P&D e novas tecnologias','innovator'],['Operações e processos','executor'],['Finanças e performance','analyst'],['Marketing e stakeholders','communicator']]},
+    {id:8,text:'Ao liderar, você foca em:',o:[['Visão e objetivos','strategist'],['Criatividade','innovator'],['Processos claros','executor'],['Métricas e performance','analyst'],['Talentos e comunicação','communicator']]},
+    {id:9,text:'Para decidir, você considera:',o:[['Visão de longo prazo','strategist'],['Diferenciação e inovação','innovator'],['Viabilidade operacional','executor'],['ROI e riscos','analyst'],['Impacto nos stakeholders','communicator']]},
+    {id:10,text:'Objetivo ideal:',o:[['Ser CEO de corporação','strategist'],['Criar startup unicórnio','innovator'],['Excelência operacional','executor'],['Autoridade em análise','analyst'],['Marca pessoal influente','communicator']]}
+  ],
+  profiles:{
+    strategist:{name:'Estrategista Empresarial',icon:'🎯',desc:'Planejamento estratégico e visão de longo prazo.'},
+    innovator:{name:'Inovador Tecnológico',icon:'💡',desc:'Criatividade e soluções disruptivas.'},
+    executor:{name:'Executor Operacional',icon:'⚡',desc:'Eficiência e implementação prática.'},
+    analyst:{name:'Analista Financeiro',icon:'📊',desc:'Decisões orientadas por dados.'},
+    communicator:{name:'Comunicador Estratégico',icon:'🎙️',desc:'Relacionamentos, marketing e vendas.'}
+  },
+
+  loadQuestionnaire(){ this.state.currentQuestion=0; this.state.userAnswers=[]; this.displayQuestion(); this.updateQProgress(); },
+  displayQuestion(){ const q=this.questions[this.state.currentQuestion]; if(!q) return; const qt=document.getElementById('questionText'); const qo=document.getElementById('questionOptions'); if(qt) qt.textContent=q.text; if(qo){ qo.innerHTML=''; q.o.forEach((opt,i)=>{ const b=document.createElement('button'); b.className='question-option'; b.textContent=opt[0]; b.dataset.index=i; const ans=this.state.userAnswers[this.state.currentQuestion]; if(ans&&ans.i===i) b.classList.add('selected'); b.addEventListener('click',()=>this.selectOption(i)); qo.appendChild(b); }); } this.updateQNav(); },
+  selectOption(i){ const q=this.questions[this.state.currentQuestion]; const opt=q.o[i]; this.state.userAnswers[this.state.currentQuestion]={ q:q.id, i, p:opt[1] }; document.querySelectorAll('.question-option').forEach(b=>b.classList.remove('selected')); document.querySelector(`[data-index="${i}"]`)?.classList.add('selected'); this.updateQNav(); this.saveState(); if(this.state.currentQuestion < this.questions.length-1){ setTimeout(()=>this.nextQuestion(),800); } },
+  updateQProgress(){ const cq=document.getElementById('currentQ'); const tq=document.getElementById('totalQ'); const mp=document.getElementById('miniProgressFill'); if(cq) cq.textContent=this.state.currentQuestion+1; if(tq) tq.textContent=this.questions.length; if(mp) mp.style.width = (((this.state.currentQuestion+1)/this.questions.length)*100)+'%'; },
+  updateQNav(){ const prev=document.getElementById('prevBtn'); const next=document.getElementById('nextBtn'); const fin=document.getElementById('finishBtn'); if(prev) prev.disabled = this.state.currentQuestion===0; const answered = !!this.state.userAnswers[this.state.currentQuestion]; if(next) next.disabled = !answered; const all = this.state.userAnswers.filter(a=>a).length===this.questions.length; const last = this.state.currentQuestion===this.questions.length-1; if(fin){ if(last && all){ fin.classList.remove('hidden'); fin.disabled=false; if(next) next.classList.add('hidden'); } else { fin.classList.add('hidden'); fin.disabled=true; if(next) next.classList.remove('hidden'); } } this.updateQProgress(); },
+  nextQuestion(){ if(this.state.currentQuestion<this.questions.length-1){ this.state.currentQuestion++; this.displayQuestion(); } },
+  prevQuestion(){ if(this.state.currentQuestion>0){ this.state.currentQuestion--; this.displayQuestion(); } },
+  finishQuestionnaire(){ const all = this.state.userAnswers.filter(a=>a).length===this.questions.length; if(!all) return this.showAlert('Responda todas as perguntas','error'); const score={strategist:0,innovator:0,executor:0,analyst:0,communicator:0}; this.state.userAnswers.forEach(a=>{ if(a?.p) score[a.p]++; }); const top = Object.keys(score).reduce((a,b)=> score[a]>score[b]?a:b); const prof = this.profiles[top]; this.state.userProfile = { type:top, name:prof.name, icon:prof.icon, description:prof.desc, scores:score }; const pr=document.getElementById('profileResult'); if(pr){ pr.classList.remove('hidden'); document.getElementById('profileIcon').textContent=prof.icon; document.getElementById('profileName').textContent=prof.name; document.getElementById('profileDesc').textContent=prof.desc; const ps=document.getElementById('profileStrengths'); if(ps){ ps.innerHTML=''; this.getProfileStrengths(top).forEach(s=>{ const tag=document.createElement('span'); tag.className='strength-tag'; tag.textContent=s; ps.appendChild(tag); }) } }
+    this.showAlert(`Seu perfil: ${prof.name}!`,'success');
+  },
+  getProfileStrengths(t){ const m={strategist:['Planejamento','Liderança','Visão','Análise'],innovator:['Criatividade','Tecnologia','Inovação','P&D'],executor:['Execução','Eficiência','Implementação','Resultados'],analyst:['Dados','Métricas','Finanças','Insights'],communicator:['Comunicação','Relacionamento','Marketing','Networking']}; return m[t]||['Habilidades']; },
+  finishAct1(){ this.showAlert('Ato 1 concluído!','success'); if(this.state.currentTeam){ const t=this.state.currentTeam; t.act1Completed=true; t.lastUpdated=new Date().toISOString(); this.saveTeam(t); } setTimeout(()=>this.showScreen('teamScreen'),1500); },
+
+  // ========= Professor =========
+  async loadTeacherDashboard(){ this.updateTeacherStats(); this.loadTeamsList(); },
+  updateTeacherStats(){ const teams=this.getAllTeams(); const students=teams.reduce((s,t)=>s+(t.members?.length||0),0); const tt=document.getElementById('totalTeams'); const ts=document.getElementById('totalStudents'); if(tt) tt.textContent=teams.length; if(ts) ts.textContent=students; },
+  loadTeamsList(){ const el=document.getElementById('teamsList'); if(!el) return; const teams=this.getAllTeams(); if(!teams.length){ el.innerHTML='<div class="no-teams">📝 Nenhuma equipe criada ainda</div>'; return;} el.innerHTML=''; teams.forEach(t=>{ const d=document.createElement('div'); d.className='team-item'; d.innerHTML = `<div class="team-header"><h4>${t.name}</h4><span class="team-code">Código: ${t.code}</span></div><div class="team-info"><span>👥 ${t.members?.length||0} membros</span><span>📅 ${this.fmt(t.createdAt)}</span></div><div class="team-actions"><button class="btn btn--xs btn--outline" onclick="EmpresaTec.viewTeam('${t.code}')">👁️ Ver</button><button class="btn btn--xs btn--danger" onclick="EmpresaTec.deleteTeam('${t.code}')">🗑️ Excluir</button></div>`; el.appendChild(d); }); },
+  viewTeam(code){ const t=this.findTeamLocal(code); if(!t) return this.showAlert('Equipe não encontrada','error'); const mem=t.members.map(m=>`• ${m.name} ${m.isLeader?'(Líder)':''}`).join('
+'); alert(`🏢 ${t.name}
+🎯 ${t.code}
+👥 ${t.members.length}
+📅 ${this.fmt(t.createdAt)}
+
+${mem}`); },
+  async deleteTeam(code){ if(!confirm(`Excluir ${code}?`)) return; const teams=this.getAllTeams().filter(t=>t.code!==code); localStorage.setItem('empresatec_teams', JSON.stringify(teams)); if(this.state.online){ try{ await window.FB.del(window.FB.doc('teams', this.normalizeCode(code))); }catch(e){ console.warn('⚠️ Falha ao remover remoto:', e.message); } } this.loadTeamsList(); this.updateTeacherStats(); this.showAlert('Empresa excluída','success'); },
+  exportData(){ const teams=this.getAllTeams(); const data={ timestamp:new Date().toISOString(), totalTeams:teams.length, totalStudents:teams.reduce((s,t)=>s+(t.members?.length||0),0), teams }; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`empresatec_export_${new Date().toISOString().slice(0,10)}.json`; a.click(); this.showAlert('Dados exportados','success'); },
+  resetAllData(){ if(!confirm('Apagar TODOS os dados?')) return; if(!confirm('Confirma? Esta ação é irreversível.')) return; localStorage.removeItem('empresatec_teams'); localStorage.removeItem('empresatec_state'); this.loadTeamsList(); this.updateTeacherStats(); this.showAlert('Dados resetados','success'); },
+
+  // ========= Storage / Estado =========
+  saveState(){ try{ const s={...this.state}; delete s.teacherPassword; localStorage.setItem('empresatec_state', JSON.stringify(s)); }catch{} },
+  loadState(){ try{ const s=localStorage.getItem('empresatec_state'); if(s){ const p=JSON.parse(s); const pw=this.state.teacherPassword; this.state={...this.state,...p,teacherPassword:pw}; } }catch{} },
+
+  // ========= Util =========
+  uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,9); },
+  teamCode(){ const C='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; let r=''; for(let i=0;i<6;i++){ r+=C[Math.floor(Math.random()*C.length)]; } return r; },
+  isValidEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); },
+  fmt(d){ try{ return new Date(d).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return 'N/A'} },
+
+  // ========= UI =========
+  showAlert(msg,type='info'){ const as=document.getElementById('alertSystem'); const ac=document.getElementById('alertContent'); const ai=document.getElementById('alertIcon'); const am=document.getElementById('alertMessage'); if(!as||!ac||!ai||!am){ alert(msg); return; } const icons={success:'✅',error:'❌',warning:'⚠️',info:'ℹ️'}; ai.textContent=icons[type]||icons.info; am.textContent=msg; ac.className = `alert-content ${type}`; as.classList.remove('hidden'); setTimeout(()=>this.hideAlert(),5000); },
+  hideAlert(){ document.getElementById('alertSystem')?.classList.add('hidden'); },
+  showLoading(t='Carregando...'){ const o=document.getElementById('loadingOverlay'); const lt=document.getElementById('loadingText'); o?.classList.remove('hidden'); if(lt) lt.textContent=t; },
+  hideLoading(){ document.getElementById('loadingOverlay')?.classList.add('hidden'); },
+  updateUserInfo(){ const el=document.getElementById('currentUserName'); if(el&&this.state.currentUser) el.textContent = '👤 '+this.state.currentUser.name; },
+
+  // ========= Debug =========
+  debug(){ console.log({state:this.state, teams:this.getAllTeams(), online:this.state.online}); return {state:this.state, teams:this.getAllTeams(), online:this.state.online}; },
+  clearStorage(){ if(confirm('Limpar dados locais?')){ localStorage.clear(); location.reload(); } }
+};
+
+document.addEventListener('DOMContentLoaded', ()=>{ window.EmpresaTec = EmpresaTec; window.debug = EmpresaTec.debug.bind(EmpresaTec); EmpresaTec.init(); });
