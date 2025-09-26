@@ -3,634 +3,616 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EmpresaTec - Simulação Empresarial Completa</title>
+    <title>EmpresaTec - Simulação Empresarial</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Botão de Logout -->
-    <div id="logoutContainer" class="logout-container hidden">
-        <button type="button" class="btn btn--logout" id="logoutBtn">
-            <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16,17 21,12 16,7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-            Sair
-        </button>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p id="loadingText">Carregando...</p>
+        </div>
+    </div>
+
+    <!-- Alert System -->
+    <div id="alertSystem" class="alert-system hidden">
+        <div class="alert-content" id="alertContent">
+            <span id="alertIcon">ℹ️</span>
+            <span id="alertMessage">Mensagem</span>
+            <button id="alertClose" class="alert-close">×</button>
+        </div>
+    </div>
+
+    <!-- User Info Bar -->
+    <div id="userBar" class="user-bar hidden">
         <div class="user-info">
-            <span class="user-email" id="userEmail">Usuário</span>
+            <span id="currentUser">👤 Usuário</span>
+            <span id="currentTeam">🏢 Equipe</span>
+            <span id="currentScore">🏆 0 pontos</span>
+        </div>
+        <button id="logoutBtn" class="btn btn--sm btn--danger">
+            🚪 Sair
+        </button>
+    </div>
+
+    <!-- Progress Bar -->
+    <div id="progressBar" class="progress-bar hidden">
+        <div class="progress-info">
+            <span id="progressLabel">EmpresaTec - Ato 1</span>
+            <span id="progressPhase">Fase 1 de 5</span>
+        </div>
+        <div class="progress-track">
+            <div id="progressFill" class="progress-fill"></div>
         </div>
     </div>
 
-    <!-- Barra de Progresso Global -->
-    <div class="progress-container hidden" id="progressContainer">
-        <div class="progress-header">
-            <h4 id="gameTitle">EmpresaTec - Ato 1 de 5</h4>
-            <div class="progress-text" id="progressText">Fase 1 de 5</div>
-        </div>
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
-        </div>
-        <div class="act-navigation">
-            <button class="btn btn--xs btn--outline" id="prevActBtn" disabled>← Ato Anterior</button>
-            <div class="current-score">Pontuação: <span id="currentScore">0</span></div>
-            <button class="btn btn--xs btn--outline" id="nextActBtn" disabled>Próximo Ato →</button>
-        </div>
-    </div>
+    <!-- Main Container -->
+    <div class="main-container">
 
-    <!-- ===== TELA DE LOGIN ===== -->
-    <div class="screen active" id="loginScreen">
-        <div class="container">
-            <div class="login-card">
-                <div class="logo">
-                    <h1>🏢 EmpresaTec</h1>
-                    <div class="subtitle">Simulação Empresarial Completa - 5 Atos</div>
-                </div>
-                <p class="welcome-text">
-                    Bem-vindo à simulação empresarial mais completa! 
-                    Gerencie sua empresa através de 5 atos desafiadores envolvendo custos, 
-                    qualidade, tecnologia e tomada de decisão estratégica.
-                </p>
-                <form id="loginForm">
-                    <div class="form-group">
-                        <label class="form-label" for="email">Email</label>
-                        <input type="email" id="email" class="form-control" required placeholder="seu@email.com">
+        <!-- ===== TELA DE LOGIN ===== -->
+        <div class="screen active" id="loginScreen">
+            <div class="screen-content">
+                <div class="login-card">
+                    <div class="logo">
+                        <h1>🏢 EmpresaTec</h1>
+                        <p class="subtitle">Simulação Empresarial - 5 Atos Completos</p>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label" for="password">Senha</label>
-                        <input type="password" id="password" class="form-control" required placeholder="Digite sua senha">
+
+                    <div class="welcome-message">
+                        <p>Bem-vindo ao sistema mais completo de simulação empresarial educacional!</p>
+                        <p>Gerencie sua empresa através de 5 atos desafiadores.</p>
                     </div>
-                    <button type="submit" class="btn btn--primary btn--full-width">
-                        <span>Entrar no EmpresaTec</span>
-                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M5 12h14M12 5l7 7-7 7"/>
-                        </svg>
-                    </button>
-                </form>
-                <div class="teacher-access">
-                    <button type="button" class="btn btn--outline btn--sm" id="teacherBtn">👩‍🏫 Painel Professor</button>
+
+                    <form id="loginForm" class="login-form">
+                        <div class="form-group">
+                            <label for="loginEmail" class="form-label">📧 Email</label>
+                            <input type="email" id="loginEmail" class="form-input" 
+                                   placeholder="seu@email.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="loginPassword" class="form-label">🔐 Senha</label>
+                            <input type="password" id="loginPassword" class="form-input" 
+                                   placeholder="Digite sua senha" required>
+                        </div>
+
+                        <button type="submit" class="btn btn--primary btn--large btn--full">
+                            🚀 Entrar no EmpresaTec
+                        </button>
+                    </form>
+
+                    <div class="login-options">
+                        <div class="divider">
+                            <span>ou</span>
+                        </div>
+                        <button id="teacherAccessBtn" class="btn btn--outline btn--full">
+                            👩‍🏫 Acesso Professor
+                        </button>
+                    </div>
+
+                    <div class="login-info">
+                        <p><strong>💡 Dica:</strong> Use qualquer email/senha para criar conta automaticamente</p>
+                        <p><strong>🔑 Professor:</strong> Clique em "Acesso Professor" acima</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- ===== SELEÇÃO DE EQUIPE ===== -->
-    <div class="screen" id="teamScreen">
-        <div class="container">
-            <div class="screen-header">
-                <h2>📋 Formação de Equipe Empresarial</h2>
-                <p class="screen-description">
-                    Forme sua equipe de 3-6 membros para enfrentar os 5 atos da simulação. 
-                    Cada membro terá um papel crucial no sucesso da empresa!
-                </p>
-            </div>
-
-            <div class="team-options">
-                <div class="option-card" id="createTeamCard">
-                    <div class="option-icon">👑</div>
-                    <h3>Criar Nova Empresa</h3>
-                    <p>Seja o CEO fundador e forme uma nova empresa virtual</p>
-                    <div class="form-group">
-                        <input type="text" id="teamName" class="form-control" placeholder="Nome da sua empresa" maxlength="50">
-                    </div>
-                    <button class="btn btn--primary" id="createTeamBtn">🚀 Fundar Empresa</button>
+        <!-- ===== TELA DE FORMAÇÃO DE EQUIPE ===== -->
+        <div class="screen" id="teamScreen">
+            <div class="screen-content">
+                <div class="screen-header">
+                    <h2>👥 Formação da Equipe Empresarial</h2>
+                    <p class="screen-subtitle">
+                        Forme sua equipe de 3-6 membros ou entre em uma equipe existente
+                    </p>
                 </div>
 
-                <div class="option-card" id="joinTeamCard">
-                    <div class="option-icon">👥</div>
-                    <h3>Entrar em Empresa</h3>
-                    <p>Use o código fornecido pelo CEO da empresa</p>
-                    <div class="form-group">
-                        <input type="text" id="teamCode" class="form-control" placeholder="Código da empresa" maxlength="10">
-                    </div>
-                    <button class="btn btn--secondary" id="joinTeamBtn">🤝 Entrar na Empresa</button>
-                </div>
-            </div>
+                <div class="team-options">
+                    <div class="option-card">
+                        <div class="option-header">
+                            <div class="option-icon">👑</div>
+                            <h3>Criar Nova Empresa</h3>
+                        </div>
+                        <p>Seja o CEO fundador e crie uma nova empresa</p>
 
-            <div class="team-status hidden" id="teamStatus">
-                <div class="team-info">
-                    <h3 id="teamNameDisplay">Minha Empresa</h3>
-                    <div class="team-code-display">
-                        <span>Código da Empresa: </span>
-                        <code id="teamCodeDisplay">ABC123</code>
-                        <button class="btn btn--outline btn--xs" id="copyCodeBtn">📋 Copiar</button>
+                        <form id="createTeamForm" class="team-form">
+                            <div class="form-group">
+                                <label for="companyName" class="form-label">Nome da Empresa</label>
+                                <input type="text" id="companyName" class="form-input" 
+                                       placeholder="Digite o nome da sua empresa" 
+                                       maxlength="50" required>
+                            </div>
+                            <button type="submit" class="btn btn--primary btn--full">
+                                🏗️ Fundar Empresa
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="option-card">
+                        <div class="option-header">
+                            <div class="option-icon">🤝</div>
+                            <h3>Entrar em Empresa</h3>
+                        </div>
+                        <p>Use o código fornecido pelo CEO da empresa</p>
+
+                        <form id="joinTeamForm" class="team-form">
+                            <div class="form-group">
+                                <label for="teamCode" class="form-label">Código da Empresa</label>
+                                <input type="text" id="teamCode" class="form-input" 
+                                       placeholder="Digite o código (6 caracteres)" 
+                                       maxlength="6" required style="text-transform: uppercase;">
+                            </div>
+                            <button type="submit" class="btn btn--secondary btn--full">
+                                🚀 Entrar na Empresa
+                            </button>
+                        </form>
                     </div>
                 </div>
 
-                <div class="members-section">
-                    <h4>👥 Equipe Executiva</h4>
-                    <div class="members-list" id="membersList"></div>
-                    <div class="members-waiting" id="membersWaiting">
-                        <p>⏳ Aguardando mais membros se juntarem...</p>
-                        <div class="recommended-size">Recomendado: 3-6 executivos</div>
+                <!-- Team Status -->
+                <div id="teamStatus" class="team-status hidden">
+                    <div class="status-header">
+                        <h3 id="teamName">Minha Empresa</h3>
+                        <div class="team-code-display">
+                            <span>Código: </span>
+                            <code id="teamCodeDisplay">ABC123</code>
+                            <button id="copyCodeBtn" class="btn btn--xs btn--outline">📋</button>
+                        </div>
                     </div>
-                </div>
 
-                <div class="leader-actions hidden" id="leaderActions">
-                    <button class="btn btn--success btn--large" id="startAct1Btn">
-                        ✨ Iniciar Ato 1 - Fundação
-                    </button>
+                    <div class="team-members">
+                        <h4>👥 Membros da Equipe</h4>
+                        <div id="membersList" class="members-list">
+                            <!-- Members will be added here -->
+                        </div>
+                        <div id="teamWaiting" class="team-waiting">
+                            <p>⏳ Aguardando mais membros...</p>
+                            <small>Mínimo: 3 membros | Máximo: 6 membros</small>
+                        </div>
+                    </div>
+
+                    <div id="startGameSection" class="start-game hidden">
+                        <button id="startAct1Btn" class="btn btn--success btn--large btn--full">
+                            ✨ Iniciar Ato 1 - Fundação da Empresa
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- ===== ATO 1: FUNDAÇÃO DA EMPRESA ===== -->
-    <div class="screen" id="act1Screen">
-        <div class="container">
-            <div class="act-header">
-                <h2>🏗️ Ato 1: Fundação da Empresa</h2>
-                <p class="act-description">
-                    Estabeleça as bases sólidas da sua empresa. Defina perfis, escolha o segmento, 
-                    estruture a organização e aloque o orçamento inicial de R$ 500.000.
-                </p>
-                <div class="act-progress">
-                    <span>Fase <span id="act1Phase">1</span> de 5</span>
-                    <div class="budget-display">Orçamento: R$ <span id="act1Budget">500.000</span></div>
+        <!-- ===== ATO 1 - FUNDAÇÃO DA EMPRESA ===== -->
+        <div class="screen" id="act1Screen">
+            <div class="screen-content">
+                <div class="act-header">
+                    <h2>🏗️ Ato 1: Fundação da Empresa</h2>
+                    <p class="act-subtitle">
+                        Estabeleça as bases sólidas da sua empresa através de 5 fases estratégicas
+                    </p>
+                    <div class="act-info">
+                        <div class="budget-info">
+                            <span class="budget-label">💰 Orçamento:</span>
+                            <span id="act1Budget" class="budget-value">R$ 500.000</span>
+                        </div>
+                        <div class="phase-info">
+                            <span class="phase-label">📋 Fase Atual:</span>
+                            <span id="act1CurrentPhase" class="phase-value">1 de 5</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Fase 1: Perfis Profissionais -->
-            <div class="phase-content active" id="act1Phase1">
-                <div class="phase-card">
-                    <h3>🧠 Fase 1: Descoberta de Perfis Profissionais</h3>
-                    <p>Cada membro deve descobrir seu perfil para formar uma equipe equilibrada.</p>
+                <!-- Phase 1: Profile Discovery -->
+                <div class="phase-container active" id="phase1Container">
+                    <div class="phase-header">
+                        <h3>🧠 Fase 1: Descoberta de Perfis Profissionais</h3>
+                        <p>Complete o questionário para descobrir seu perfil empresarial</p>
+                    </div>
 
-                    <div class="questionnaire-container">
-                        <div class="question-card active" id="profileQuestion">
+                    <div class="questionnaire" id="questionnaire">
+                        <div class="question-progress">
+                            <div class="progress-text">
+                                Pergunta <span id="currentQ">1</span> de <span id="totalQ">10</span>
+                            </div>
+                            <div class="progress-mini">
+                                <div id="progressMini" class="progress-mini-fill"></div>
+                            </div>
+                        </div>
+
+                        <div id="questionCard" class="question-card">
                             <h4 id="questionText">Carregando pergunta...</h4>
-                            <div class="question-options" id="questionOptions">
-                                <!-- Opções serão carregadas dinamicamente -->
+                            <div id="questionOptions" class="question-options">
+                                <!-- Options will be loaded here -->
                             </div>
                         </div>
 
-                        <div class="question-navigation">
-                            <button class="btn btn--outline" id="prevQuestionBtn" disabled>⬅ Anterior</button>
-                            <div class="question-counter">
-                                Pergunta <span id="currentQuestionNum">1</span> de <span id="totalQuestions">10</span>
-                            </div>
-                            <button class="btn btn--primary" id="nextQuestionBtn" disabled>Próxima ➡</button>
-                            <button class="btn btn--success hidden" id="finishProfileBtn">✅ Finalizar Perfil</button>
+                        <div class="question-nav">
+                            <button id="prevBtn" class="btn btn--outline" disabled>⬅️ Anterior</button>
+                            <button id="nextBtn" class="btn btn--primary" disabled>Próxima ➡️</button>
+                            <button id="finishProfileBtn" class="btn btn--success hidden">✅ Finalizar</button>
                         </div>
                     </div>
-                </div>
 
-                <div class="phase-actions">
-                    <button class="btn btn--success btn--large hidden" id="continueToSegmentBtn">
-                        Continuar para Escolha do Segmento ➡
-                    </button>
-                </div>
-            </div>
+                    <div id="profileResult" class="profile-result hidden">
+                        <div class="result-card">
+                            <div class="profile-icon" id="profileIcon">🎯</div>
+                            <h4 id="profileName">Seu Perfil</h4>
+                            <p id="profileDescription">Descrição do perfil</p>
+                            <div class="profile-strengths">
+                                <h5>💪 Pontos Fortes:</h5>
+                                <div id="profileStrengths" class="strengths-list"></div>
+                            </div>
+                        </div>
 
-            <!-- Fase 2: Escolha do Segmento -->
-            <div class="phase-content" id="act1Phase2">
-                <div class="phase-card">
-                    <h3>🏭 Fase 2: Escolha do Segmento Empresarial</h3>
-                    <p>Escolha o segmento tecnológico onde sua empresa irá atuar. Esta decisão impactará todas as fases seguintes.</p>
+                        <div id="waitingOthers" class="waiting-section">
+                            <p>⏳ Aguardando outros membros completarem o questionário...</p>
+                            <div id="profileProgress" class="profile-progress"></div>
+                        </div>
 
-                    <div class="segments-grid" id="segmentsGrid">
-                        <!-- Segmentos serão carregados dinamicamente -->
-                    </div>
-
-                    <div class="voting-section">
-                        <h4>🗳️ Votação da Equipe</h4>
-                        <div class="vote-status" id="voteStatus">Aguardando votos...</div>
-                        <button class="btn btn--primary btn--large hidden" id="submitSegmentVoteBtn">
-                            📊 Confirmar Voto
+                        <button id="continueToPhase2" class="btn btn--success btn--large btn--full hidden">
+                            Continuar para Fase 2 ➡️
                         </button>
                     </div>
                 </div>
 
-                <div class="phase-actions">
-                    <button class="btn btn--success btn--large hidden" id="continueToStructureBtn">
-                        Continuar para Estrutura Organizacional ➡
-                    </button>
-                </div>
-            </div>
+                <!-- Phase 2: Segment Selection -->
+                <div class="phase-container" id="phase2Container">
+                    <div class="phase-header">
+                        <h3>🏭 Fase 2: Escolha do Segmento Empresarial</h3>
+                        <p>Vote no segmento tecnológico onde sua empresa irá atuar</p>
+                    </div>
 
-            <!-- Fase 3: Estrutura Organizacional -->
-            <div class="phase-content" id="act1Phase3">
-                <div class="phase-card">
-                    <h3>👔 Fase 3: Estrutura Organizacional</h3>
-                    <p>Defina a hierarquia e os cargos executivos da empresa.</p>
+                    <div id="segmentSelection" class="segment-selection">
+                        <div class="segments-grid" id="segmentsGrid">
+                            <!-- Segments will be loaded here -->
+                        </div>
 
-                    <div class="org-structure">
-                        <div class="ceo-election">
-                            <h4>👑 Eleição do CEO</h4>
-                            <div class="candidates-grid" id="candidatesGrid">
-                                <!-- Candidatos serão listados -->
+                        <div class="voting-info">
+                            <div id="votingStatus" class="voting-status">
+                                <p>🗳️ Status da Votação</p>
+                                <div id="voteCount">Aguardando votos...</div>
                             </div>
-                            <button class="btn btn--primary btn--large hidden" id="submitCEOVoteBtn">
-                                ✅ Votar para CEO
+                            <button id="submitSegmentVote" class="btn btn--primary btn--large hidden">
+                                📊 Confirmar Voto
                             </button>
                         </div>
 
-                        <div class="positions-assignment hidden" id="positionsAssignment">
-                            <h4>📋 Atribuição de Cargos (CEO)</h4>
-                            <div class="positions-grid" id="positionsGrid">
-                                <!-- Grid de atribuições -->
+                        <div id="segmentResult" class="segment-result hidden">
+                            <div class="result-announcement">
+                                <h4>🎉 Segmento Escolhido!</h4>
+                                <div id="winningSegment" class="winning-segment"></div>
                             </div>
-                            <button class="btn btn--primary btn--large" id="confirmPositionsBtn">
-                                ✅ Confirmar Cargos
+                            <button id="continueToPhase3" class="btn btn--success btn--large btn--full">
+                                Continuar para Fase 3 ➡️
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div class="phase-actions">
-                    <button class="btn btn--success btn--large hidden" id="continueToLocationBtn">
-                        Continuar para Localização da Sede ➡
-                    </button>
-                </div>
-            </div>
+                <!-- Phase 3: CEO Election -->
+                <div class="phase-container" id="phase3Container">
+                    <div class="phase-header">
+                        <h3>👑 Fase 3: Eleição do CEO</h3>
+                        <p>Vote no membro que será o CEO da empresa</p>
+                    </div>
 
-            <!-- Fase 4: Localização e Sede -->
-            <div class="phase-content" id="act1Phase4">
-                <div class="phase-card">
-                    <h3>🏢 Fase 4: Localização da Sede</h3>
-                    <p>Escolha a localização e o tipo de sede da empresa. Decisão impacta custos operacionais.</p>
-
-                    <div class="location-options">
-                        <div class="location-grid">
-                            <div class="location-card" data-location="centro">
-                                <h4>🏙️ Centro Empresarial</h4>
-                                <div class="location-details">
-                                    <p><strong>Custo:</strong> R$ 200.000</p>
-                                    <p><strong>Vantagens:</strong> Prestígio, acessibilidade</p>
-                                    <p><strong>Desvantagens:</strong> Alto custo, trânsito</p>
-                                </div>
-                            </div>
-
-                            <div class="location-card" data-location="tecnologico">
-                                <h4>🔬 Parque Tecnológico</h4>
-                                <div class="location-details">
-                                    <p><strong>Custo:</strong> R$ 150.000</p>
-                                    <p><strong>Vantagens:</strong> Inovação, networking</p>
-                                    <p><strong>Desvantagens:</strong> Distância, especialização</p>
-                                </div>
-                            </div>
-
-                            <div class="location-card" data-location="coworking">
-                                <h4>🏢 Coworking Premium</h4>
-                                <div class="location-details">
-                                    <p><strong>Custo:</strong> R$ 80.000</p>
-                                    <p><strong>Vantagens:</strong> Flexibilidade, custo</p>
-                                    <p><strong>Desvantagens:</strong> Menos privacidade</p>
-                                </div>
-                            </div>
-
-                            <div class="location-card" data-location="home">
-                                <h4>🏠 Home Office</h4>
-                                <div class="location-details">
-                                    <p><strong>Custo:</strong> R$ 30.000</p>
-                                    <p><strong>Vantagens:</strong> Economia, flexibilidade</p>
-                                    <p><strong>Desvantagens:</strong> Imagem, colaboração</p>
-                                </div>
-                            </div>
+                    <div id="ceoElection" class="ceo-election">
+                        <div class="candidates-grid" id="candidatesGrid">
+                            <!-- Candidates will be loaded here -->
                         </div>
 
-                        <button class="btn btn--primary btn--large hidden" id="confirmLocationBtn">
-                            ✅ Confirmar Localização
-                        </button>
+                        <div class="election-info">
+                            <div id="electionStatus" class="election-status">
+                                <p>🗳️ Status da Eleição</p>
+                                <div id="electionCount">Aguardando votos...</div>
+                            </div>
+                            <button id="submitCeoVote" class="btn btn--primary btn--large hidden">
+                                👑 Confirmar Voto para CEO
+                            </button>
+                        </div>
+
+                        <div id="ceoResult" class="ceo-result hidden">
+                            <div class="result-announcement">
+                                <h4>👑 CEO Eleito!</h4>
+                                <div id="electedCeo" class="elected-ceo"></div>
+                            </div>
+                            <button id="continueToPhase4" class="btn btn--success btn--large btn--full">
+                                Continuar para Fase 4 ➡️
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="phase-actions">
-                    <button class="btn btn--success btn--large hidden" id="continueToEquipmentBtn">
-                        Continuar para Equipamentos ➡
-                    </button>
+                <!-- Phase 4: Location Selection -->
+                <div class="phase-container" id="phase4Container">
+                    <div class="phase-header">
+                        <h3>🏢 Fase 4: Localização da Sede</h3>
+                        <p>Escolha a localização ideal para a sede da empresa</p>
+                    </div>
+
+                    <div id="locationSelection" class="location-selection">
+                        <div class="locations-grid" id="locationsGrid">
+                            <!-- Locations will be loaded here -->
+                        </div>
+
+                        <div class="location-actions">
+                            <button id="confirmLocation" class="btn btn--primary btn--large btn--full hidden">
+                                🏢 Confirmar Localização
+                            </button>
+                        </div>
+
+                        <div id="locationResult" class="location-result hidden">
+                            <div class="result-announcement">
+                                <h4>🏢 Sede Definida!</h4>
+                                <div id="chosenLocation" class="chosen-location"></div>
+                            </div>
+                            <button id="continueToPhase5" class="btn btn--success btn--large btn--full">
+                                Continuar para Fase 5 ➡️
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Fase 5: Equipamentos e Orçamento -->
-            <div class="phase-content" id="act1Phase5">
-                <div class="phase-card">
-                    <h3>💻 Fase 5: Equipamentos e Orçamento Final</h3>
-                    <p>Aloque o orçamento restante em equipamentos e licenças necessárias.</p>
+                <!-- Phase 5: Equipment Purchase -->
+                <div class="phase-container" id="phase5Container">
+                    <div class="phase-header">
+                        <h3>💻 Fase 5: Aquisição de Equipamentos</h3>
+                        <p>Invista o orçamento restante em equipamentos essenciais</p>
+                    </div>
 
-                    <div class="budget-allocation">
+                    <div id="equipmentPurchase" class="equipment-purchase">
                         <div class="budget-summary">
-                            <h4>💰 Resumo Orçamentário</h4>
-                            <div class="budget-line">
-                                <span>Orçamento Inicial:</span>
-                                <span>R$ 500.000</span>
-                            </div>
-                            <div class="budget-line spent">
-                                <span>Gastos até agora:</span>
-                                <span id="totalSpent">R$ 0</span>
-                            </div>
-                            <div class="budget-line remaining">
-                                <span>Saldo Disponível:</span>
-                                <span id="remainingBudget">R$ 500.000</span>
+                            <div class="budget-card">
+                                <h4>💰 Resumo Orçamentário</h4>
+                                <div class="budget-line">
+                                    <span>Orçamento Inicial:</span>
+                                    <span>R$ 500.000</span>
+                                </div>
+                                <div class="budget-line spent">
+                                    <span>Gastos Anteriores:</span>
+                                    <span id="spentAmount">R$ 0</span>
+                                </div>
+                                <div class="budget-line current">
+                                    <span>Investimento Atual:</span>
+                                    <span id="currentSpending">R$ 0</span>
+                                </div>
+                                <div class="budget-line remaining">
+                                    <span>Saldo Restante:</span>
+                                    <span id="remainingBudget">R$ 500.000</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="equipment-options">
-                            <h4>🛠️ Equipamentos Disponíveis</h4>
-                            <div class="equipment-grid">
-                                <div class="equipment-card" data-equipment="basic">
-                                    <h5>💻 Equipamentos Básicos</h5>
-                                    <p>Computadores, impressoras, mobiliário</p>
-                                    <div class="equipment-cost">R$ 30.000</div>
-                                    <button class="btn btn--outline equipment-btn">Adquirir</button>
-                                </div>
+                        <div class="equipment-grid" id="equipmentGrid">
+                            <!-- Equipment will be loaded here -->
+                        </div>
 
-                                <div class="equipment-card" data-equipment="advanced">
-                                    <h5>🖥️ Equipamentos Avançados</h5>
-                                    <p>Workstations, servidores, equipamentos especializados</p>
-                                    <div class="equipment-cost">R$ 80.000</div>
-                                    <button class="btn btn--outline equipment-btn">Adquirir</button>
-                                </div>
+                        <div class="equipment-actions">
+                            <button id="finishAct1" class="btn btn--success btn--large btn--full">
+                                🎯 Finalizar Ato 1
+                            </button>
+                        </div>
 
-                                <div class="equipment-card" data-equipment="software">
-                                    <h5>⚙️ Licenças de Software</h5>
-                                    <p>Pacote Office, ferramentas desenvolvimento, design</p>
-                                    <div class="equipment-cost">R$ 15.000</div>
-                                    <button class="btn btn--outline equipment-btn">Adquirir</button>
+                        <div id="act1Result" class="act1-result hidden">
+                            <div class="result-announcement">
+                                <h4>🎉 Ato 1 Concluído!</h4>
+                                <div class="final-score">
+                                    <span>Pontuação Final: </span>
+                                    <span id="act1Score" class="score-value">0</span>
                                 </div>
-
-                                <div class="equipment-card" data-equipment="security">
-                                    <h5>🔒 Segurança e Backup</h5>
-                                    <p>Antivírus, firewall, sistema de backup</p>
-                                    <div class="equipment-cost">R$ 20.000</div>
-                                    <button class="btn btn--outline equipment-btn">Adquirir</button>
-                                </div>
+                                <p>Aguardando aprovação do professor para continuar...</p>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="phase-actions">
-                    <button class="btn btn--success btn--large" id="finishAct1Btn">
-                        🎯 Finalizar Ato 1
-                    </button>
-                </div>
             </div>
         </div>
-    </div>
 
-    <!-- ===== ATO 2: ESTRUTURAÇÃO OPERACIONAL ===== -->
-    <div class="screen" id="act2Screen">
-        <div class="container">
-            <div class="act-header">
-                <h2>⚙️ Ato 2: Estruturação Operacional</h2>
-                <p class="act-description">
-                    Defina processos, tecnologias e sistemas de qualidade. 
-                    Orçamento adicional: R$ 300.000 para operacionalização.
-                </p>
-                <div class="act-progress">
-                    <span>Fase <span id="act2Phase">1</span> de 5</span>
-                    <div class="budget-display">Orçamento: R$ <span id="act2Budget">300.000</span></div>
+        <!-- ===== PAINEL DO PROFESSOR ===== -->
+        <div class="screen" id="teacherScreen">
+            <div class="screen-content">
+                <div class="teacher-header">
+                    <h2>👩‍🏫 Painel do Professor</h2>
+                    <p class="teacher-subtitle">Controle completo da simulação empresarial</p>
                 </div>
-            </div>
 
-            <!-- Fases do Ato 2 serão implementadas aqui -->
-            <div class="coming-soon">
-                <h3>🚧 Implementação Progressiva</h3>
-                <p>As fases do Ato 2 serão liberadas após conclusão do Ato 1 por todas as equipes.</p>
-                <div class="unlock-requirements">
-                    <h4>📋 Requisitos para Desbloqueio:</h4>
-                    <ul>
-                        <li>✅ Todas as equipes devem completar Ato 1</li>
-                        <li>✅ Professor deve aprovar liberação</li>
-                        <li>✅ Ranking do Ato 1 deve ser exibido</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
+                <!-- Password Section -->
+                <div id="teacherLogin" class="teacher-login">
+                    <div class="login-card">
+                        <h3>🔐 Acesso Administrativo</h3>
+                        <p>Digite a senha de administrador para acessar o painel</p>
 
-    <!-- ===== ATO 3: DESENVOLVIMENTO ===== -->
-    <div class="screen" id="act3Screen">
-        <div class="container">
-            <div class="act-header">
-                <h2>🔬 Ato 3: Desenvolvimento de Produto/Serviço</h2>
-                <p class="act-description">
-                    Pesquise, desenvolva e teste sua solução. 
-                    Orçamento de P&D: R$ 250.000.
-                </p>
-            </div>
-            <div class="coming-soon">
-                <h3>🔒 Ato Bloqueado</h3>
-                <p>Será liberado após aprovação do professor no Ato 2.</p>
-            </div>
-        </div>
-    </div>
+                        <form id="teacherPasswordForm" class="password-form">
+                            <div class="form-group">
+                                <label for="teacherPassword" class="form-label">Senha do Professor</label>
+                                <input type="password" id="teacherPassword" class="form-input" 
+                                       placeholder="Digite a senha administrativa" required>
+                            </div>
+                            <button type="submit" class="btn btn--primary btn--full">
+                                🚪 Entrar no Painel
+                            </button>
+                        </form>
 
-    <!-- ===== ATO 4: LANÇAMENTO ===== -->
-    <div class="screen" id="act4Screen">
-        <div class="container">
-            <div class="act-header">
-                <h2>🚀 Ato 4: Lançamento no Mercado</h2>
-                <p class="act-description">
-                    Estratégias de marketing e vendas. 
-                    Orçamento de lançamento: R$ 400.000.
-                </p>
-            </div>
-            <div class="coming-soon">
-                <h3>🔒 Ato Bloqueado</h3>
-                <p>Será liberado após aprovação do professor no Ato 3.</p>
-            </div>
-        </div>
-    </div>
+                        <div class="teacher-info">
+                            <p><strong>💡 Dica:</strong> A senha padrão é <code>professor2025</code></p>
+                        </div>
 
-    <!-- ===== ATO 5: EXPANSÃO ===== -->
-    <div class="screen" id="act5Screen">
-        <div class="container">
-            <div class="act-header">
-                <h2>📈 Ato 5: Crescimento e Expansão</h2>
-                <p class="act-description">
-                    Análise de resultados e estratégias futuras. 
-                    Orçamento de expansão: R$ 600.000.
-                </p>
-            </div>
-            <div class="coming-soon">
-                <h3>🔒 Ato Bloqueado</h3>
-                <p>Será liberado após aprovação do professor no Ato 4.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== RANKING E RESULTADOS ===== -->
-    <div class="screen" id="rankingScreen">
-        <div class="container">
-            <div class="screen-header">
-                <h2>🏆 Ranking - <span id="rankingTitle">Ato 1</span></h2>
-                <p class="screen-description">Resultados e classificação das equipes</p>
-            </div>
-
-            <div class="ranking-content">
-                <div class="ranking-summary">
-                    <h3>📊 Resumo Geral</h3>
-                    <div class="summary-stats" id="summaryStats">
-                        <!-- Estatísticas gerais -->
+                        <button id="backToLoginBtn" class="btn btn--outline btn--full">
+                            ⬅️ Voltar ao Login
+                        </button>
                     </div>
                 </div>
 
-                <div class="ranking-table">
-                    <h3>🏅 Classificação Final</h3>
-                    <div class="ranking-list" id="rankingList">
-                        <!-- Lista de ranking -->
-                    </div>
-                </div>
-
-                <div class="professor-approval">
-                    <h3>👩‍🏫 Aprovação do Professor</h3>
-                    <div class="approval-status" id="approvalStatus">
-                        Aguardando aprovação do professor para liberar próximo ato...
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== PAINEL DO PROFESSOR ===== -->
-    <div class="screen" id="teacherScreen">
-        <div class="container">
-            <div class="screen-header">
-                <h2>👩‍🏫 Painel do Professor</h2>
-                <p class="screen-description">Controle completo da simulação empresarial</p>
-            </div>
-
-            <div class="teacher-dashboard">
-                <div class="dashboard-stats">
-                    <div class="stat-card">
-                        <h4>🏢 Empresas</h4>
-                        <div class="stat-number" id="totalTeams">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <h4>👥 Participantes</h4>
-                        <div class="stat-number" id="totalParticipants">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <h4>🎭 Ato Atual</h4>
-                        <div class="stat-number" id="currentActNumber">1</div>
-                    </div>
-                    <div class="stat-card">
-                        <h4>✅ Completos</h4>
-                        <div class="stat-number" id="completedTeams">0</div>
-                    </div>
-                </div>
-
-                <div class="teacher-controls">
-                    <div class="control-section">
-                        <h3>🎮 Controle dos Atos</h3>
-                        <div class="act-controls">
-                            <button class="btn btn--success" id="approveAct1Btn">✅ Aprovar Ato 1</button>
-                            <button class="btn btn--success" id="approveAct2Btn" disabled>✅ Aprovar Ato 2</button>
-                            <button class="btn btn--success" id="approveAct3Btn" disabled>✅ Aprovar Ato 3</button>
-                            <button class="btn btn--success" id="approveAct4Btn" disabled>✅ Aprovar Ato 4</button>
-                            <button class="btn btn--success" id="approveAct5Btn" disabled>✅ Aprovar Ato 5</button>
+                <!-- Teacher Dashboard -->
+                <div id="teacherDashboard" class="teacher-dashboard hidden">
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">🏢</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="totalCompanies">0</div>
+                                <div class="stat-label">Empresas</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="totalStudents">0</div>
+                                <div class="stat-label">Estudantes</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🎭</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="currentAct">1</div>
+                                <div class="stat-label">Ato Atual</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="completedTeams">0</div>
+                                <div class="stat-label">Completas</div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="control-section">
-                        <h3>📊 Relatórios e Rankings</h3>
-                        <div class="report-controls">
-                            <button class="btn btn--primary" id="showRankingBtn">🏆 Exibir Ranking</button>
-                            <button class="btn btn--outline" id="exportResultsBtn">📤 Exportar Resultados</button>
-                            <button class="btn btn--outline" id="generateReportBtn">📋 Gerar Relatório</button>
+                    <div class="teacher-controls">
+                        <div class="control-section">
+                            <h3>🎮 Controle dos Atos</h3>
+                            <div class="act-controls">
+                                <button id="approveAct1" class="btn btn--success">✅ Aprovar Ato 1</button>
+                                <button id="approveAct2" class="btn btn--success" disabled>🔒 Ato 2</button>
+                                <button id="approveAct3" class="btn btn--success" disabled>🔒 Ato 3</button>
+                                <button id="approveAct4" class="btn btn--success" disabled>🔒 Ato 4</button>
+                                <button id="approveAct5" class="btn btn--success" disabled>🔒 Ato 5</button>
+                            </div>
+                        </div>
+
+                        <div class="control-section">
+                            <h3>📊 Relatórios</h3>
+                            <div class="report-controls">
+                                <button id="showRanking" class="btn btn--primary">🏆 Mostrar Ranking</button>
+                                <button id="exportData" class="btn btn--outline">📤 Exportar Dados</button>
+                                <button id="generateReport" class="btn btn--outline">📋 Gerar Relatório</button>
+                            </div>
+                        </div>
+
+                        <div class="control-section">
+                            <h3>⚙️ Administração</h3>
+                            <div class="admin-controls">
+                                <button id="resetAllData" class="btn btn--danger">🔄 Reset Total</button>
+                                <button id="backupData" class="btn btn--outline">💾 Backup</button>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="control-section">
-                        <h3>⚙️ Administração</h3>
-                        <div class="admin-controls">
-                            <button class="btn btn--danger" id="resetSimulationBtn">🔄 Resetar Simulação</button>
-                            <button class="btn btn--outline" id="backupDataBtn">💾 Backup Dados</button>
+                    <div class="teams-monitor">
+                        <h3>📋 Monitoramento de Empresas</h3>
+                        <div id="teamsMonitor" class="teams-grid">
+                            <div class="loading-message">📊 Carregando empresas...</div>
                         </div>
                     </div>
 
-                    <div class="password-section">
-                        <label>Senha de Administrador:</label>
-                        <input type="password" id="adminPassword" class="form-control" placeholder="Digite a senha">
-                    </div>
-                </div>
-
-                <div class="teams-monitor">
-                    <h3>📋 Monitoramento de Empresas</h3>
-                    <div class="teams-grid" id="teacherTeamsGrid">
-                        <!-- Grid de monitoramento -->
+                    <div class="teacher-actions">
+                        <button id="backToSimulation" class="btn btn--outline btn--large">
+                            ⬅️ Voltar à Simulação
+                        </button>
+                        <button id="teacherLogout" class="btn btn--danger btn--large">
+                            🚪 Sair do Painel
+                        </button>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <button class="btn btn--outline" id="backToSimulationBtn">
-                ⬅️ Voltar à Simulação
-            </button>
+        <!-- ===== RANKING SCREEN ===== -->
+        <div class="screen" id="rankingScreen">
+            <div class="screen-content">
+                <div class="ranking-header">
+                    <h2>🏆 Ranking das Empresas</h2>
+                    <p class="ranking-subtitle">Classificação geral após o Ato 1</p>
+                </div>
+
+                <div class="ranking-content">
+                    <div class="ranking-stats">
+                        <div class="ranking-summary" id="rankingSummary">
+                            <!-- Summary will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="ranking-list">
+                        <h3>🥇 Classificação Final</h3>
+                        <div id="rankingTable" class="ranking-table">
+                            <!-- Ranking will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="ranking-actions">
+                        <button id="closeRanking" class="btn btn--primary btn--large">
+                            ✅ Fechar Ranking
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Scripts -->
-    <script src="empresatec-complete.js"></script>
+    <script src="app.js"></script>
 
-    <!-- Firebase Configuration -->
+    <!-- Firebase Configuration (Fallback Safe) -->
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-        import { 
-            getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, 
-            onAuthStateChanged, signOut 
-        } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-        import { 
-            getFirestore, doc, setDoc, getDoc, deleteDoc, collection, 
-            addDoc, updateDoc, onSnapshot, query, where, orderBy, getDocs 
-        } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+        // Firebase configuration with error handling
+        try {
+            // Import Firebase modules
+            const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+            const { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
+            const { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, addDoc, updateDoc, onSnapshot, query, where, orderBy, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDUBDKmRSc3BRDtez_g4Cd8VRYOGq6f7JQ",
-            authDomain: "simulacao-empresa.firebaseapp.com",
-            projectId: "simulacao-empresa",
-            storageBucket: "simulacao-empresa.firebasestorage.app",
-            messagingSenderId: "454064270255",
-            appId: "1:454064270255:web:f3d65cc4fc6018e1715d5a",
-            measurementId: "G-029B5VNF4M"
-        };
+            // Firebase config
+            const firebaseConfig = {
+                apiKey: "AIzaSyDUBDKmRSc3BRDtez_g4Cd8VRYOGq6f7JQ",
+                authDomain: "simulacao-empresa.firebaseapp.com",
+                projectId: "simulacao-empresa",
+                storageBucket: "simulacao-empresa.firebasestorage.app",
+                messagingSenderId: "454064270255",
+                appId: "1:454064270255:web:f3d65cc4fc6018e1715d5a",
+                measurementId: "G-029B5VNF4M"
+            };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
 
-        window.firebaseAuth = auth;
-        window.firebaseDB = db;
-        window.firebaseUtils = {
-            createUserWithEmailAndPassword, signInWithEmailAndPassword,
-            onAuthStateChanged, signOut, doc, setDoc, getDoc, deleteDoc,
-            collection, addDoc, updateDoc, onSnapshot, query, where, orderBy, getDocs
-        };
+            // Make Firebase available globally
+            window.firebase = {
+                auth,
+                db,
+                signInWithEmailAndPassword,
+                createUserWithEmailAndPassword,
+                onAuthStateChanged,
+                signOut,
+                doc,
+                setDoc,
+                getDoc,
+                deleteDoc,
+                collection,
+                addDoc,
+                updateDoc,
+                onSnapshot,
+                query,
+                where,
+                orderBy,
+                getDocs
+            };
 
-        // Initialize logout system
-        function initLogoutSystem() {
-            const logoutBtn = document.getElementById('logoutBtn');
-            const logoutContainer = document.getElementById('logoutContainer');
-            const userEmail = document.getElementById('userEmail');
+            console.log('✅ Firebase inicializado com sucesso');
 
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    logoutContainer.classList.remove('hidden');
-                    userEmail.textContent = user.email;
-                } else {
-                    logoutContainer.classList.add('hidden');
-                }
-            });
-
-            logoutBtn.addEventListener('click', async () => {
-                if (confirm('Deseja realmente fazer logout?')) {
-                    try {
-                        await signOut(auth);
-                        localStorage.clear();
-                        sessionStorage.clear();
-                        window.location.reload();
-                    } catch (error) {
-                        alert('Erro ao fazer logout: ' + error.message);
-                    }
-                }
-            });
+        } catch (error) {
+            console.log('⚠️ Firebase não disponível, rodando em modo local:', error.message);
+            window.firebase = null;
         }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            initLogoutSystem();
-            console.log('✅ EmpresaTec Complete - Firebase inicializado');
-        });
     </script>
 </body>
 </html>
