@@ -7,6 +7,127 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+    <!-- BOTÃO LOGOUT SEMPRE VISÍVEL -->
+<div id="logoutContainer" style="
+    position: fixed !important;
+    top: 10px !important;
+    right: 10px !important;
+    z-index: 9999 !important;
+    background: white !important;
+    border: 2px solid #ff4757 !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-family: Arial, sans-serif !important;
+">
+    <button id="logoutBtn" style="
+        background: linear-gradient(135deg, #ff4757, #ff3838) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 6px !important;
+        padding: 6px 12px !important;
+        font-size: 13px !important;
+        font-weight: bold !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+    ">
+        🚪 Sair
+    </button>
+    <span id="userEmail" style="
+        font-size: 11px !important;
+        color: #666 !important;
+        max-width: 120px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    ">Usuário</span>
+</div>
+
+<script>
+// SISTEMA DE LOGOUT - EXECUTA IMEDIATAMENTE
+console.log('🚪 Inicializando sistema de logout...');
+
+// Garantir que o botão sempre apareça
+document.getElementById('logoutContainer').style.display = 'flex';
+
+// Função de logout
+document.getElementById('logoutBtn').onclick = async function() {
+    console.log('🚪 Botão logout clicado!');
+    
+    if (confirm('Deseja realmente fazer logout?')) {
+        try {
+            this.innerHTML = '⏳ Saindo...';
+            this.disabled = true;
+            
+            // Logout Firebase (se disponível)
+            if (window.firebaseAuth && window.firebaseUtils) {
+                console.log('🔥 Fazendo logout Firebase...');
+                await window.firebaseUtils.signOut(window.firebaseAuth);
+            }
+            
+            // Limpar tudo
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            console.log('✅ Logout concluído!');
+            alert('Logout realizado com sucesso!');
+            
+            // Recarregar página
+            window.location.href = window.location.href;
+            
+        } catch (error) {
+            console.error('❌ Erro no logout:', error);
+            alert('Erro ao fazer logout: ' + error.message);
+            this.innerHTML = '🚪 Sair';
+            this.disabled = false;
+        }
+    }
+};
+
+// Atualizar email do usuário
+function atualizarUsuario() {
+    const emailElement = document.getElementById('userEmail');
+    
+    // Tentar pegar do Firebase
+    if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+        emailElement.textContent = window.firebaseAuth.currentUser.email || 'Firebase User';
+        return;
+    }
+    
+    // Tentar pegar do localStorage
+    const savedEmail = localStorage.getItem('userEmail') || 
+                      localStorage.getItem('currentUser') ||
+                      localStorage.getItem('user');
+    
+    if (savedEmail) {
+        emailElement.textContent = savedEmail;
+        return;
+    }
+    
+    // Pegar do formulário de login se existir
+    const emailInput = document.getElementById('email');
+    if (emailInput && emailInput.value) {
+        emailElement.textContent = emailInput.value;
+        return;
+    }
+    
+    emailElement.textContent = 'Usuário Logado';
+}
+
+// Executar atualização a cada 2 segundos
+setInterval(atualizarUsuario, 2000);
+
+// Executar imediatamente
+atualizarUsuario();
+
+console.log('✅ Sistema de logout ativado!');
+</script>
     <div class="logout-container hidden" id="logoutContainer">
     <button type="button" class="btn btn--logout" id="logoutBtn">
         <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
