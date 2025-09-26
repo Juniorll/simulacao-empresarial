@@ -296,5 +296,26 @@
     </div>
 
     <script src="app.js"></script>
+    <!-- Firebase SDKs -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+// COLE AQUI SUA CONFIGURAÇÃO FIREBASE
+const firebaseConfig = {
+  apiKey: "AIzaSyDUBDKmRSc3BRDtez_g4Cd8VRYOGq6f7JQ",
+  authDomain: "simulacao-empresa.firebaseapp.com",
+  projectId: "simulacao-empresa",
+  storageBucket: "simulacao-empresa.firebasestorage.app",
+  messagingSenderId: "454064270255",
+  appId: "1:454064270255:web:f3d65cc4fc6018e1715d5a",
+  measurementId: "G-029B5VNF4M"
+};
+
+const app = initializeApp(firebaseConfig);
+window.firebaseAuth = getAuth(app);
+window.firebaseDB = getFirestore(app);
+</script>
 </body>
 </html>
