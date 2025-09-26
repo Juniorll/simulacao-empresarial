@@ -5,17 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EmpresaTec - Sistema de Simulação Empresarial</title>
     <link rel="stylesheet" href="style.css">
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay hidden">
-        <div class="loading-spinner"></div>
-        <div id="loadingText" class="loading-text">Carregando...</div>
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div id="loadingText" class="loading-text">Carregando...</div>
+        </div>
     </div>
 
     <!-- Alert System -->
@@ -29,30 +26,8 @@
         </div>
     </div>
 
-    <!-- User Bar -->
-    <div id="userBar" class="user-bar hidden">
-        <div class="user-info">
-            <span id="currentUser" class="user-name">👤 Usuário</span>
-            <span id="currentTeam" class="team-name">🏢 Empresa</span>
-            <span id="currentScore" class="score">🏆 0 pontos</span>
-        </div>
-        <button id="logoutBtn" class="btn btn--sm btn--outline">Sair</button>
-    </div>
-
-    <!-- Progress Bar -->
-    <div id="progressBar" class="progress-bar hidden">
-        <div class="progress-info">
-            <span id="progressLabel" class="progress-label">EmpresaTec</span>
-            <span id="progressPhase" class="progress-phase">Fase 1 de 5</span>
-        </div>
-        <div class="progress-track">
-            <div id="progressFill" class="progress-fill" style="width: 0%"></div>
-        </div>
-    </div>
-
     <!-- Main Container -->
     <div class="main-container">
-
         <!-- LOGIN SCREEN -->
         <div id="loginScreen" class="screen active">
             <div class="login-container">
@@ -66,132 +41,85 @@
                     <h2>🚀 Entre no Sistema</h2>
                     <div class="form-group">
                         <label for="loginEmail">📧 Email</label>
-                        <input type="email" id="loginEmail" name="email" placeholder="seu.email@exemplo.com" required>
+                        <input type="email" id="loginEmail" placeholder="seu.email@exemplo.com" required>
                     </div>
                     <div class="form-group">
                         <label for="loginPassword">🔐 Senha</label>
-                        <input type="password" id="loginPassword" name="password" placeholder="Digite sua senha" required>
+                        <input type="password" id="loginPassword" placeholder="Digite sua senha" required>
                     </div>
-                    <button type="submit" class="btn btn--primary btn--full">🚀 Entrar no EmpresaTec</button>
+                    <button type="submit" class="btn btn--primary btn--full">🚀 Entrar</button>
                     <div class="login-info">
                         <small>💡 Digite qualquer email e senha - a conta será criada automaticamente!</small>
                     </div>
                 </form>
 
                 <div class="teacher-access">
-                    <button id="teacherAccessBtn" class="btn btn--outline">👩‍🏫 Acesso Professor</button>
-                </div>
-
-                <div class="system-info">
-                    <div class="connection-status" id="connectionStatus">
-                        <span class="status-indicator" id="statusIndicator">🔴</span>
-                        <span class="status-text" id="statusText">Verificando conexão...</span>
-                    </div>
+                    <button id="teacherBtn" class="btn btn--outline">👩‍🏫 Acesso Professor</button>
                 </div>
             </div>
         </div>
 
-        <!-- TEACHER SCREEN -->
+        <!-- TEACHER LOGIN SCREEN -->
         <div id="teacherScreen" class="screen">
             <div class="teacher-container">
-                <!-- Teacher Login -->
-                <div id="teacherLogin" class="teacher-login">
-                    <div class="teacher-header">
-                        <h2>👩‍🏫 Painel do Professor</h2>
-                        <p>Digite a senha para acessar o sistema administrativo</p>
-                    </div>
-
-                    <form id="teacherPasswordForm" class="teacher-form">
+                <div class="teacher-login">
+                    <h2>👩‍🏫 Painel do Professor</h2>
+                    <form id="teacherForm" class="teacher-form">
                         <div class="form-group">
                             <label for="teacherPassword">🔐 Senha do Professor</label>
                             <input type="password" id="teacherPassword" placeholder="Digite a senha" required>
                         </div>
-                        <button type="submit" class="btn btn--primary">🔓 Acessar Painel</button>
+                        <button type="submit" class="btn btn--primary">🔓 Acessar</button>
                     </form>
-
-                    <button id="backToLoginBtn" class="btn btn--outline btn--sm">← Voltar ao Login</button>
+                    <button id="backToLogin" class="btn btn--outline">← Voltar</button>
                 </div>
 
                 <!-- Teacher Dashboard -->
                 <div id="teacherDashboard" class="teacher-dashboard hidden">
-                    <header class="dashboard-header">
+                    <div class="dashboard-header">
                         <h1>📊 Dashboard do Professor</h1>
                         <div class="dashboard-actions">
-                            <button id="backToSimulation" class="btn btn--outline btn--sm">🎮 Voltar à Simulação</button>
-                            <button id="teacherLogout" class="btn btn--danger btn--sm">🚪 Sair</button>
+                            <button id="exportBtn" class="btn btn--info">📤 Exportar</button>
+                            <button id="resetBtn" class="btn btn--danger">🗑️ Reset</button>
+                            <button id="logoutTeacher" class="btn btn--outline">🚪 Sair</button>
                         </div>
-                    </header>
+                    </div>
 
-                    <!-- Stats -->
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-icon">🏢</div>
                             <div class="stat-content">
-                                <div class="stat-number" id="totalCompanies">0</div>
-                                <div class="stat-label">Empresas Criadas</div>
+                                <div class="stat-number" id="totalTeams">0</div>
+                                <div class="stat-label">Empresas</div>
                             </div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon">👥</div>
                             <div class="stat-content">
                                 <div class="stat-number" id="totalStudents">0</div>
-                                <div class="stat-label">Estudantes Participando</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">🎯</div>
-                            <div class="stat-content">
-                                <div class="stat-number" id="currentAct">1</div>
-                                <div class="stat-label">Ato Atual</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">✅</div>
-                            <div class="stat-content">
-                                <div class="stat-number" id="completedTeams">0</div>
-                                <div class="stat-label">Equipes Concluídas</div>
+                                <div class="stat-label">Estudantes</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Teacher Controls -->
-                    <div class="teacher-controls">
-                        <h3>🎮 Controles do Jogo</h3>
-                        <div class="controls-grid">
-                            <button id="approveAct1" class="btn btn--success">✅ Aprovar Ato 1</button>
-                            <button id="approveAct2" class="btn btn--success" disabled>🔒 Aprovar Ato 2</button>
-                            <button id="approveAct3" class="btn btn--success" disabled>🔒 Aprovar Ato 3</button>
-                            <button id="approveAct4" class="btn btn--success" disabled>🔒 Aprovar Ato 4</button>
-                            <button id="approveAct5" class="btn btn--success" disabled>🔒 Aprovar Ato 5</button>
-                        </div>
-                    </div>
-
-                    <!-- Data Management -->
-                    <div class="data-management">
-                        <h3>📊 Gestão de Dados</h3>
-                        <div class="data-actions">
-                            <button id="showRanking" class="btn btn--info">🏆 Ver Ranking</button>
-                            <button id="exportData" class="btn btn--info">📤 Exportar Dados</button>
-                            <button id="generateReport" class="btn btn--info">📋 Gerar Relatório</button>
-                            <button id="backupData" class="btn btn--warning">💾 Backup</button>
-                            <button id="resetAllData" class="btn btn--danger">🗑️ Reset Geral</button>
-                        </div>
-                    </div>
-
-                    <!-- Teams Monitor -->
-                    <div class="teams-monitor">
-                        <h3>👥 Monitor de Equipes</h3>
-                        <div id="teamsMonitor" class="teams-list">
-                            <div class="loading-message">📊 Carregando equipes...</div>
+                    <div class="teams-section">
+                        <h3>👥 Equipes Cadastradas</h3>
+                        <div id="teamsList" class="teams-list">
+                            <div class="no-teams">📝 Nenhuma equipe criada ainda</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- TEAM SCREEN -->
+        <!-- TEAM MANAGEMENT SCREEN -->
         <div id="teamScreen" class="screen">
             <div class="team-container">
+                <div class="user-info">
+                    <span id="currentUserName">👤 Usuário</span>
+                    <button id="logoutBtn" class="btn btn--outline btn--sm">Sair</button>
+                </div>
+
                 <div class="team-header">
                     <h2>🏢 Gestão de Empresa</h2>
                     <p>Crie uma nova empresa ou entre em uma existente</p>
@@ -200,13 +128,13 @@
                 <div class="team-options">
                     <!-- Create Team -->
                     <div class="team-option">
-                        <h3>🏗️ Fundar Nova Empresa</h3>
+                        <h3>🏗️ Criar Nova Empresa</h3>
                         <form id="createTeamForm" class="team-form">
                             <div class="form-group">
                                 <label for="companyName">🏢 Nome da Empresa</label>
                                 <input type="text" id="companyName" placeholder="Ex: TechStart Inovação" required>
                             </div>
-                            <button type="submit" class="btn btn--primary">🏗️ Fundar Empresa</button>
+                            <button type="submit" class="btn btn--primary">🏗️ Criar Empresa</button>
                         </form>
                     </div>
 
@@ -218,181 +146,125 @@
                                 <label for="teamCode">🎯 Código da Empresa</label>
                                 <input type="text" id="teamCode" placeholder="Ex: ABC123" maxlength="6" required>
                             </div>
-                            <button type="submit" class="btn btn--secondary">🤝 Entrar na Empresa</button>
+                            <button type="submit" class="btn btn--secondary">🤝 Entrar</button>
                         </form>
                     </div>
                 </div>
 
                 <!-- Team Status -->
                 <div id="teamStatus" class="team-status hidden">
-                    <h3 id="teamName" class="team-name">Nome da Empresa</h3>
-                    <div class="team-code">
-                        <span>📋 Código: </span>
-                        <span id="teamCodeDisplay" class="code-display">ABC123</span>
-                        <button id="copyCodeBtn" class="btn btn--xs btn--outline">📋 Copiar</button>
-                    </div>
-
-                    <div class="members-section">
-                        <h4>👥 Membros da Equipe</h4>
-                        <div id="membersList" class="members-list">
-                            <!-- Membros serão inseridos aqui -->
+                    <h3 id="teamName">Nome da Empresa</h3>
+                    <div class="team-info">
+                        <div class="team-code">
+                            <span>📋 Código: </span>
+                            <span id="teamCodeDisplay">------</span>
+                            <button id="copyBtn" class="btn btn--xs">📋</button>
+                        </div>
+                        <div class="team-members">
+                            <h4>👥 Membros da Equipe</h4>
+                            <div id="membersList" class="members-list"></div>
                         </div>
                     </div>
 
-                    <div id="teamWaiting" class="team-waiting">
-                        <p>⏳ Aguardando mais membros...</p>
-                    </div>
-
-                    <div id="startGameSection" class="start-game hidden">
-                        <button id="startAct1Btn" class="btn btn--primary btn--large">✨ Iniciar Ato 1</button>
+                    <div id="startSection" class="start-section hidden">
+                        <button id="startBtn" class="btn btn--success btn--large">✨ Iniciar Simulação</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ACT 1 SCREEN -->
-        <div id="act1Screen" class="screen">
-            <div class="act-container">
-                <div class="act-header">
-                    <h1>🏗️ Ato 1: Fundação da Empresa</h1>
-                    <p>Fase <span id="act1CurrentPhase">1</span> de 5</p>
+        <!-- SIMULATION SCREEN (ATO 1) -->
+        <div id="simulationScreen" class="screen">
+            <div class="simulation-container">
+                <div class="simulation-header">
+                    <div class="sim-info">
+                        <span id="simUserName">👤 Usuário</span>
+                        <span id="simTeamName">🏢 Empresa</span>
+                    </div>
+                    <button id="logoutSim" class="btn btn--outline btn--sm">Sair</button>
                 </div>
 
-                <!-- Phase 1: Profile Questionnaire -->
-                <div id="phase1Container" class="phase-container active">
+                <div class="act-info">
+                    <h1>🏗️ Ato 1: Fundação da Empresa</h1>
+                    <div class="phase-progress">
+                        <span>Fase <span id="currentPhase">1</span> de 5</span>
+                        <div class="progress-bar">
+                            <div id="progressFill" class="progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fase 1: Questionário -->
+                <div id="phase1" class="phase-container active">
                     <div class="phase-content">
                         <h2>🧠 Descobrindo seu Perfil Profissional</h2>
                         <p>Responda às perguntas para descobrir suas características empresariais</p>
 
-                        <div class="questionnaire-progress">
-                            <span>Pergunta <span id="currentQ">1</span> de <span id="totalQ">10</span></span>
-                            <div class="progress-mini">
-                                <div id="progressMini" class="progress-mini-fill"></div>
-                            </div>
-                        </div>
-
-                        <div class="question-container">
-                            <h3 id="questionText" class="question-text">Carregando pergunta...</h3>
-                            <div id="questionOptions" class="question-options">
-                                <!-- Opções serão inseridas aqui -->
-                            </div>
-                        </div>
-
-                        <div class="question-navigation">
-                            <button id="prevBtn" class="btn btn--outline" disabled>← Anterior</button>
-                            <button id="nextBtn" class="btn btn--primary" disabled>Próxima →</button>
-                            <button id="finishProfileBtn" class="btn btn--success hidden" disabled>✅ Finalizar Perfil</button>
-                        </div>
-
-                        <div id="profileResult" class="profile-result hidden">
-                            <h3>🎯 Seu Perfil Empresarial</h3>
-                            <div class="profile-card">
-                                <div id="profileIcon" class="profile-icon">🎯</div>
-                                <h4 id="profileName" class="profile-name">Perfil</h4>
-                                <p id="profileDescription" class="profile-description">Descrição do perfil</p>
-                                <div class="profile-strengths">
-                                    <h5>💪 Pontos Fortes:</h5>
-                                    <div id="profileStrengths" class="strengths-list">
-                                        <!-- Forças serão inseridas aqui -->
-                                    </div>
+                        <div class="questionnaire">
+                            <div class="question-progress">
+                                <span>Pergunta <span id="currentQ">1</span> de <span id="totalQ">10</span></span>
+                                <div class="mini-progress">
+                                    <div id="miniProgressFill" class="mini-progress-fill"></div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div id="waitingOthers" class="waiting-others">
-                            <p id="profileProgress">Aguardando outros membros completarem o perfil...</p>
-                        </div>
+                            <div class="question-card">
+                                <h3 id="questionText">Carregando pergunta...</h3>
+                                <div id="questionOptions" class="question-options"></div>
+                            </div>
 
-                        <div class="phase-actions">
-                            <button id="continueToPhase2" class="btn btn--primary btn--large hidden">🏭 Continuar para Fase 2</button>
+                            <div class="question-nav">
+                                <button id="prevBtn" class="btn btn--outline" disabled>← Anterior</button>
+                                <button id="nextBtn" class="btn btn--primary" disabled>Próxima →</button>
+                                <button id="finishBtn" class="btn btn--success hidden" disabled>✅ Finalizar</button>
+                            </div>
+
+                            <!-- Profile Result -->
+                            <div id="profileResult" class="profile-result hidden">
+                                <h3>🎯 Seu Perfil Empresarial</h3>
+                                <div class="profile-card">
+                                    <div id="profileIcon" class="profile-icon">🎯</div>
+                                    <h4 id="profileName">Perfil</h4>
+                                    <p id="profileDesc">Descrição do perfil</p>
+                                    <div id="profileStrengths" class="profile-strengths"></div>
+                                </div>
+                                <button id="continueBtn" class="btn btn--primary">Continuar →</button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Phase 2: Segment Selection -->
-                <div id="phase2Container" class="phase-container">
+                <!-- Fases 2-5: Placeholders -->
+                <div id="phase2" class="phase-container">
                     <div class="phase-content">
-                        <h2>🏭 Seleção do Segmento Empresarial</h2>
-                        <p>Escolha o setor tecnológico da sua empresa</p>
-                        <div class="phase-placeholder">
-                            <div class="placeholder-icon">🚧</div>
-                            <h3>Fase em Desenvolvimento</h3>
-                            <p>Esta fase será implementada em breve</p>
-                        </div>
-                        <div class="phase-actions">
-                            <button id="continueToPhase3" class="btn btn--primary btn--large">👑 Continuar para Fase 3</button>
-                        </div>
+                        <h2>🏭 Seleção do Segmento</h2>
+                        <p>Em desenvolvimento...</p>
+                        <button id="nextPhase2" class="btn btn--primary">Continuar →</button>
                     </div>
                 </div>
 
-                <!-- Phase 3: CEO Election -->
-                <div id="phase3Container" class="phase-container">
+                <div id="phase3" class="phase-container">
                     <div class="phase-content">
                         <h2>👑 Eleição do CEO</h2>
-                        <p>Vote democraticamente no líder da empresa</p>
-                        <div class="phase-placeholder">
-                            <div class="placeholder-icon">🚧</div>
-                            <h3>Fase em Desenvolvimento</h3>
-                            <p>Esta fase será implementada em breve</p>
-                        </div>
-                        <div class="phase-actions">
-                            <button id="continueToPhase4" class="btn btn--primary btn--large">🏢 Continuar para Fase 4</button>
-                        </div>
+                        <p>Em desenvolvimento...</p>
+                        <button id="nextPhase3" class="btn btn--primary">Continuar →</button>
                     </div>
                 </div>
 
-                <!-- Phase 4: Location Selection -->
-                <div id="phase4Container" class="phase-container">
+                <div id="phase4" class="phase-container">
                     <div class="phase-content">
                         <h2>🏢 Seleção da Sede</h2>
-                        <p>Escolha a localização da sua empresa</p>
-                        <div class="phase-placeholder">
-                            <div class="placeholder-icon">🚧</div>
-                            <h3>Fase em Desenvolvimento</h3>
-                            <p>Esta fase será implementada em breve</p>
-                        </div>
-                        <div class="phase-actions">
-                            <button id="continueToPhase5" class="btn btn--primary btn--large">💻 Continuar para Fase 5</button>
-                        </div>
+                        <p>Em desenvolvimento...</p>
+                        <button id="nextPhase4" class="btn btn--primary">Continuar →</button>
                     </div>
                 </div>
 
-                <!-- Phase 5: Equipment Selection -->
-                <div id="phase5Container" class="phase-container">
+                <div id="phase5" class="phase-container">
                     <div class="phase-content">
-                        <h2>💻 Seleção de Equipamentos</h2>
-                        <p>Invista o orçamento em equipamentos essenciais</p>
-                        <div class="budget-info">
-                            <span class="budget-label">💰 Orçamento Disponível:</span>
-                            <span id="act1Budget" class="budget-value">R$ 500.000</span>
-                        </div>
-                        <div class="phase-placeholder">
-                            <div class="placeholder-icon">🚧</div>
-                            <h3>Fase em Desenvolvimento</h3>
-                            <p>Esta fase será implementada em breve</p>
-                        </div>
-                        <div class="phase-actions">
-                            <button id="finishAct1" class="btn btn--success btn--large">🎉 Finalizar Ato 1</button>
-                        </div>
+                        <h2>💻 Equipamentos</h2>
+                        <p>Em desenvolvimento...</p>
+                        <button id="finishAct" class="btn btn--success">🎉 Finalizar Ato 1</button>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- RANKING SCREEN -->
-        <div id="rankingScreen" class="screen">
-            <div class="ranking-container">
-                <div class="ranking-header">
-                    <h1>🏆 Ranking das Empresas</h1>
-                    <button id="closeRanking" class="btn btn--outline">← Voltar</button>
-                </div>
-
-                <div id="rankingSummary" class="ranking-summary">
-                    <!-- Estatísticas gerais -->
-                </div>
-
-                <div id="rankingTable" class="ranking-table">
-                    <!-- Tabela de ranking -->
                 </div>
             </div>
         </div>
@@ -400,52 +272,15 @@
 
     <!-- Firebase Configuration -->
     <script>
-        // Configuração do Firebase
-        const firebaseConfig = {
-            // SUBSTITUA pelas suas configurações do Firebase
-            apiKey: "sua-api-key-aqui",
-            authDomain: "empresatec-projeto.firebaseapp.com",
-            projectId: "empresatec-projeto",
-            storageBucket: "empresatec-projeto.appspot.com",
+        // Configuração básica - substitua pelas suas credenciais Firebase
+        window.firebaseConfig = {
+            apiKey: "demo-key",
+            authDomain: "empresatec-demo.firebaseapp.com",
+            projectId: "empresatec-demo",
+            storageBucket: "empresatec-demo.appspot.com",
             messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef123456"
+            appId: "demo-app-id"
         };
-
-        // Inicializar Firebase (modo compatibilidade)
-        if (typeof firebase !== 'undefined') {
-            try {
-                firebase.initializeApp(firebaseConfig);
-
-                // Disponibilizar serviços globalmente
-                window.firebase = {
-                    app: firebase.app(),
-                    db: firebase.firestore(),
-                    auth: firebase.auth(),
-
-                    // Métodos Firestore
-                    doc: firebase.firestore.doc,
-                    collection: firebase.firestore.collection,
-                    setDoc: firebase.firestore.setDoc,
-                    getDoc: firebase.firestore.getDoc,
-                    getDocs: firebase.firestore.getDocs,
-                    deleteDoc: firebase.firestore.deleteDoc,
-                    writeBatch: firebase.firestore.writeBatch,
-
-                    // Métodos Auth
-                    signInWithEmailAndPassword: firebase.auth.signInWithEmailAndPassword,
-                    createUserWithEmailAndPassword: firebase.auth.createUserWithEmailAndPassword,
-                    signOut: firebase.auth.signOut
-                };
-
-                console.log('🔥 Firebase inicializado com sucesso');
-            } catch (error) {
-                console.warn('⚠️ Erro ao inicializar Firebase:', error.message);
-                console.warn('💾 Sistema funcionará apenas com localStorage');
-            }
-        } else {
-            console.warn('⚠️ Firebase SDK não carregado');
-            console.warn('💾 Sistema funcionará apenas com localStorage');
-        }
     </script>
 
     <!-- Main Application Script -->
