@@ -1,279 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EmpresaTec - Sistema de Simulação Empresarial</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay hidden">
-        <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <div id="loadingText" class="loading-text">Carregando...</div>
-        </div>
-    </div>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EmpresaTec - Sistema de Simulação Empresarial</title>
+  <link rel="stylesheet" href="style.css" />
 
-    <!-- Alert System -->
-    <div id="alertSystem" class="alert-system hidden">
-        <div id="alertContent" class="alert-content">
-            <div class="alert-header">
-                <span id="alertIcon" class="alert-icon">ℹ️</span>
-                <button id="alertClose" class="alert-close">&times;</button>
-            </div>
-            <div id="alertMessage" class="alert-message">Mensagem do sistema</div>
-        </div>
-    </div>
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
-    <!-- Main Container -->
-    <div class="main-container">
-        <!-- LOGIN SCREEN -->
-        <div id="loginScreen" class="screen active">
-            <div class="login-container">
-                <div class="brand">
-                    <div class="brand-icon">🏢</div>
-                    <h1 class="brand-title">EmpresaTec</h1>
-                    <p class="brand-subtitle">Sistema de Simulação Empresarial</p>
-                </div>
-
-                <form id="loginForm" class="login-form">
-                    <h2>🚀 Entre no Sistema</h2>
-                    <div class="form-group">
-                        <label for="loginEmail">📧 Email</label>
-                        <input type="email" id="loginEmail" placeholder="seu.email@exemplo.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="loginPassword">🔐 Senha</label>
-                        <input type="password" id="loginPassword" placeholder="Digite sua senha" required>
-                    </div>
-                    <button type="submit" class="btn btn--primary btn--full">🚀 Entrar</button>
-                    <div class="login-info">
-                        <small>💡 Digite qualquer email e senha - a conta será criada automaticamente!</small>
-                    </div>
-                </form>
-
-                <div class="teacher-access">
-                    <button id="teacherBtn" class="btn btn--outline">👩‍🏫 Acesso Professor</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- TEACHER LOGIN SCREEN -->
-        <div id="teacherScreen" class="screen">
-            <div class="teacher-container">
-                <div class="teacher-login">
-                    <h2>👩‍🏫 Painel do Professor</h2>
-                    <form id="teacherForm" class="teacher-form">
-                        <div class="form-group">
-                            <label for="teacherPassword">🔐 Senha do Professor</label>
-                            <input type="password" id="teacherPassword" placeholder="Digite a senha" required>
-                        </div>
-                        <button type="submit" class="btn btn--primary">🔓 Acessar</button>
-                    </form>
-                    <button id="backToLogin" class="btn btn--outline">← Voltar</button>
-                </div>
-
-                <!-- Teacher Dashboard -->
-                <div id="teacherDashboard" class="teacher-dashboard hidden">
-                    <div class="dashboard-header">
-                        <h1>📊 Dashboard do Professor</h1>
-                        <div class="dashboard-actions">
-                            <button id="exportBtn" class="btn btn--info">📤 Exportar</button>
-                            <button id="resetBtn" class="btn btn--danger">🗑️ Reset</button>
-                            <button id="logoutTeacher" class="btn btn--outline">🚪 Sair</button>
-                        </div>
-                    </div>
-
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon">🏢</div>
-                            <div class="stat-content">
-                                <div class="stat-number" id="totalTeams">0</div>
-                                <div class="stat-label">Empresas</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">👥</div>
-                            <div class="stat-content">
-                                <div class="stat-number" id="totalStudents">0</div>
-                                <div class="stat-label">Estudantes</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="teams-section">
-                        <h3>👥 Equipes Cadastradas</h3>
-                        <div id="teamsList" class="teams-list">
-                            <div class="no-teams">📝 Nenhuma equipe criada ainda</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- TEAM MANAGEMENT SCREEN -->
-        <div id="teamScreen" class="screen">
-            <div class="team-container">
-                <div class="user-info">
-                    <span id="currentUserName">👤 Usuário</span>
-                    <button id="logoutBtn" class="btn btn--outline btn--sm">Sair</button>
-                </div>
-
-                <div class="team-header">
-                    <h2>🏢 Gestão de Empresa</h2>
-                    <p>Crie uma nova empresa ou entre em uma existente</p>
-                </div>
-
-                <div class="team-options">
-                    <!-- Create Team -->
-                    <div class="team-option">
-                        <h3>🏗️ Criar Nova Empresa</h3>
-                        <form id="createTeamForm" class="team-form">
-                            <div class="form-group">
-                                <label for="companyName">🏢 Nome da Empresa</label>
-                                <input type="text" id="companyName" placeholder="Ex: TechStart Inovação" required>
-                            </div>
-                            <button type="submit" class="btn btn--primary">🏗️ Criar Empresa</button>
-                        </form>
-                    </div>
-
-                    <!-- Join Team -->
-                    <div class="team-option">
-                        <h3>🤝 Entrar em Empresa</h3>
-                        <form id="joinTeamForm" class="team-form">
-                            <div class="form-group">
-                                <label for="teamCode">🎯 Código da Empresa</label>
-                                <input type="text" id="teamCode" placeholder="Ex: ABC123" maxlength="6" required>
-                            </div>
-                            <button type="submit" class="btn btn--secondary">🤝 Entrar</button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Team Status -->
-                <div id="teamStatus" class="team-status hidden">
-                    <h3 id="teamName">Nome da Empresa</h3>
-                    <div class="team-info">
-                        <div class="team-code">
-                            <span>📋 Código: </span>
-                            <span id="teamCodeDisplay">------</span>
-                            <button id="copyBtn" class="btn btn--xs">📋</button>
-                        </div>
-                        <div class="team-members">
-                            <h4>👥 Membros da Equipe</h4>
-                            <div id="membersList" class="members-list"></div>
-                        </div>
-                    </div>
-
-                    <div id="startSection" class="start-section hidden">
-                        <button id="startBtn" class="btn btn--success btn--large">✨ Iniciar Simulação</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SIMULATION SCREEN (ATO 1) -->
-        <div id="simulationScreen" class="screen">
-            <div class="simulation-container">
-                <div class="simulation-header">
-                    <div class="sim-info">
-                        <span id="simUserName">👤 Usuário</span>
-                        <span id="simTeamName">🏢 Empresa</span>
-                    </div>
-                    <button id="logoutSim" class="btn btn--outline btn--sm">Sair</button>
-                </div>
-
-                <div class="act-info">
-                    <h1>🏗️ Ato 1: Fundação da Empresa</h1>
-                    <div class="phase-progress">
-                        <span>Fase <span id="currentPhase">1</span> de 5</span>
-                        <div class="progress-bar">
-                            <div id="progressFill" class="progress-fill"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Fase 1: Questionário -->
-                <div id="phase1" class="phase-container active">
-                    <div class="phase-content">
-                        <h2>🧠 Descobrindo seu Perfil Profissional</h2>
-                        <p>Responda às perguntas para descobrir suas características empresariais</p>
-
-                        <div class="questionnaire">
-                            <div class="question-progress">
-                                <span>Pergunta <span id="currentQ">1</span> de <span id="totalQ">10</span></span>
-                                <div class="mini-progress">
-                                    <div id="miniProgressFill" class="mini-progress-fill"></div>
-                                </div>
-                            </div>
-
-                            <div class="question-card">
-                                <h3 id="questionText">Carregando pergunta...</h3>
-                                <div id="questionOptions" class="question-options"></div>
-                            </div>
-
-                            <div class="question-nav">
-                                <button id="prevBtn" class="btn btn--outline" disabled>← Anterior</button>
-                                <button id="nextBtn" class="btn btn--primary" disabled>Próxima →</button>
-                                <button id="finishBtn" class="btn btn--success hidden" disabled>✅ Finalizar</button>
-                            </div>
-
-                            <!-- Profile Result -->
-                            <div id="profileResult" class="profile-result hidden">
-                                <h3>🎯 Seu Perfil Empresarial</h3>
-                                <div class="profile-card">
-                                    <div id="profileIcon" class="profile-icon">🎯</div>
-                                    <h4 id="profileName">Perfil</h4>
-                                    <p id="profileDesc">Descrição do perfil</p>
-                                    <div id="profileStrengths" class="profile-strengths"></div>
-                                </div>
-                                <button id="continueBtn" class="btn btn--primary">Continuar →</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Fases 2-5: Placeholders -->
-                <div id="phase2" class="phase-container">
-                    <div class="phase-content">
-                        <h2>🏭 Seleção do Segmento</h2>
-                        <p>Em desenvolvimento...</p>
-                        <button id="nextPhase2" class="btn btn--primary">Continuar →</button>
-                    </div>
-                </div>
-
-                <div id="phase3" class="phase-container">
-                    <div class="phase-content">
-                        <h2>👑 Eleição do CEO</h2>
-                        <p>Em desenvolvimento...</p>
-                        <button id="nextPhase3" class="btn btn--primary">Continuar →</button>
-                    </div>
-                </div>
-
-                <div id="phase4" class="phase-container">
-                    <div class="phase-content">
-                        <h2>🏢 Seleção da Sede</h2>
-                        <p>Em desenvolvimento...</p>
-                        <button id="nextPhase4" class="btn btn--primary">Continuar →</button>
-                    </div>
-                </div>
-
-                <div id="phase5" class="phase-container">
-                    <div class="phase-content">
-                        <h2>💻 Equipamentos</h2>
-                        <p>Em desenvolvimento...</p>
-                        <button id="finishAct" class="btn btn--success">🎉 Finalizar Ato 1</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Firebase Configuration -->
-    <script>
-        // Configuração básica - substitua pelas suas credenciais Firebase
-        window.firebaseConfig = {
+  <script>
+    // ATENÇÃO: SUBSTITUIR PELAS CREDENCIAIS REAIS DO FIREBASE
+    window.firebaseConfig = {
   apiKey: "AIzaSyDUBDKmRSc3BRDtez_g4Cd8VRYOGq6f7JQ",
   authDomain: "simulacao-empresa.firebaseapp.com",
   projectId: "simulacao-empresa",
@@ -281,10 +21,179 @@
   messagingSenderId: "454064270255",
   appId: "1:454064270255:web:f3d65cc4fc6018e1715d5a",
   measurementId: "G-029B5VNF4M"
-        };
-    </script>
+    };
 
-    <!-- Main Application Script -->
-    <script src="app.js"></script>
+    // Inicializa Firebase se config válida
+    (function initFirebaseCompat(){
+      try {
+        if (window.firebaseConfig && window.firebaseConfig.projectId && typeof firebase !== 'undefined') {
+          const app = firebase.initializeApp(window.firebaseConfig);
+          const db = firebase.firestore();
+          const auth = firebase.auth();
+          window.FB = {
+            app, db, auth,
+            // Firestore helpers
+            doc: (c, id) => db.collection(c).doc(id),
+            set: (ref, data) => ref.set(data),
+            get: (ref) => ref.get(),
+            all: (c) => db.collection(c).get(),
+            del: (ref) => ref.delete(),
+            // Auth helpers
+            signIn: (email, pass) => auth.signInWithEmailAndPassword(email, pass),
+            signUp: (email, pass) => auth.createUserWithEmailAndPassword(email, pass),
+            signOut: () => auth.signOut()
+          };
+          console.log('🔥 Firebase pronto (compat)');
+        } else {
+          console.warn('⚠️ Firebase não configurado. Funcionando em modo local.');
+        }
+      } catch (e) {
+        console.warn('⚠️ Erro ao iniciar Firebase (modo local ativado):', e.message);
+      }
+    })();
+  </script>
+</head>
+<body>
+  <!-- Alert -->
+  <div id="alertSystem" class="alert-system hidden">
+    <div id="alertContent" class="alert-content">
+      <div class="alert-header">
+        <span id="alertIcon" class="alert-icon">ℹ️</span>
+        <button id="alertClose" class="alert-close">&times;</button>
+      </div>
+      <div id="alertMessage" class="alert-message">Mensagem</div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div id="loadingText" class="loading-text">Carregando...</div>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <!-- LOGIN -->
+    <div id="loginScreen" class="screen active">
+      <div class="login-container">
+        <div class="brand">
+          <div class="brand-icon">🏢</div>
+          <h1 class="brand-title">EmpresaTec</h1>
+          <p class="brand-subtitle">Sistema de Simulação Empresarial</p>
+        </div>
+        <form id="loginForm" class="login-form">
+          <h2>🚀 Entrar</h2>
+          <div class="form-group">
+            <label for="loginEmail">📧 Email</label>
+            <input id="loginEmail" type="email" placeholder="seu.email@exemplo.com" required />
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">🔐 Senha</label>
+            <input id="loginPassword" type="password" placeholder="Digite sua senha" required />
+          </div>
+          <button class="btn btn--primary btn--full" type="submit">Entrar</button>
+          <div class="login-info"><small>Conta criada automaticamente no primeiro acesso.</small></div>
+        </form>
+        <div class="teacher-access"><button id="teacherBtn" class="btn btn--outline">👩‍🏫 Acesso Professor</button></div>
+      </div>
+    </div>
+
+    <!-- PROFESSOR -->
+    <div id="teacherScreen" class="screen">
+      <div class="teacher-container">
+        <div class="teacher-login">
+          <h2>👩‍🏫 Painel do Professor</h2>
+          <form id="teacherForm" class="teacher-form">
+            <div class="form-group">
+              <label for="teacherPassword">🔐 Senha do Professor</label>
+              <input id="teacherPassword" type="password" placeholder="professor2025" required />
+            </div>
+            <button class="btn btn--primary" type="submit">Acessar</button>
+          </form>
+          <button id="backToLogin" class="btn btn--outline">← Voltar</button>
+        </div>
+        <div id="teacherDashboard" class="teacher-dashboard hidden">
+          <div class="dashboard-header">
+            <h1>📊 Dashboard</h1>
+            <div class="dashboard-actions">
+              <button id="exportBtn" class="btn btn--info">📤 Exportar</button>
+              <button id="resetBtn" class="btn btn--danger">🗑️ Reset</button>
+              <button id="logoutTeacher" class="btn btn--outline">🚪 Sair</button>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-icon">🏢</div><div><div id="totalTeams" class="stat-number">0</div><div class="stat-label">Empresas</div></div></div>
+            <div class="stat-card"><div class="stat-icon">👥</div><div><div id="totalStudents" class="stat-number">0</div><div class="stat-label">Estudantes</div></div></div>
+          </div>
+          <div class="teams-section">
+            <h3>👥 Equipes</h3>
+            <div id="teamsList" class="teams-list"><div class="no-teams">📝 Nenhuma equipe criada ainda</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EQUIPES -->
+    <div id="teamScreen" class="screen">
+      <div class="team-container">
+        <div class="user-info">
+          <span id="currentUserName">👤 Usuário</span>
+          <button id="logoutBtn" class="btn btn--outline btn--sm">Sair</button>
+        </div>
+        <div class="team-header"><h2>🏢 Gestão de Empresa</h2><p>Crie uma nova empresa ou entre com um código</p></div>
+        <div class="team-options">
+          <div class="team-option">
+            <h3>🏗️ Criar Empresa</h3>
+            <form id="createTeamForm" class="team-form">
+              <div class="form-group"><label for="companyName">Nome</label><input id="companyName" type="text" required placeholder="Ex: TechStart" /></div>
+              <button class="btn btn--primary" type="submit">Criar</button>
+            </form>
+          </div>
+          <div class="team-option">
+            <h3>🤝 Entrar em Empresa</h3>
+            <form id="joinTeamForm" class="team-form">
+              <div class="form-group"><label for="teamCode">Código</label><input id="teamCode" type="text" maxlength="6" required placeholder="Ex: ABC123" /></div>
+              <button class="btn btn--secondary" type="submit">Entrar</button>
+            </form>
+          </div>
+        </div>
+        <div id="teamStatus" class="team-status hidden">
+          <h3 id="teamName">Empresa</h3>
+          <div class="team-info">
+            <div class="team-code"><span>📋 Código:</span><span id="teamCodeDisplay">------</span><button id="copyBtn" class="btn btn--xs">📋</button></div>
+            <div class="team-members"><h4>👥 Membros</h4><div id="membersList" class="members-list"></div></div>
+          </div>
+          <div id="startSection" class="start-section hidden"><button id="startBtn" class="btn btn--success btn--large">✨ Iniciar Simulação</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIMULAÇÃO (ATO 1) -->
+    <div id="simulationScreen" class="screen">
+      <div class="simulation-container">
+        <div class="simulation-header"><div class="sim-info"><span id="simUserName">👤 Usuário</span><span id="simTeamName">🏢 Empresa</span></div><button id="logoutSim" class="btn btn--outline btn--sm">Sair</button></div>
+        <div class="act-info"><h1>🏗️ Ato 1: Fundação</h1><div class="phase-progress"><span>Fase <span id="currentPhase">1</span> de 5</span><div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div></div></div>
+        <div id="phase1" class="phase-container active">
+          <div class="phase-content">
+            <h2>🧠 Perfil Profissional</h2>
+            <p>Responda às perguntas para descobrir seu perfil</p>
+            <div class="questionnaire">
+              <div class="question-progress"><span>Pergunta <span id="currentQ">1</span> de <span id="totalQ">10</span></span><div class="mini-progress"><div id="miniProgressFill" class="mini-progress-fill"></div></div></div>
+              <div class="question-card"><h3 id="questionText">Carregando...</h3><div id="questionOptions" class="question-options"></div></div>
+              <div class="question-nav"><button id="prevBtn" class="btn btn--outline" disabled>← Anterior</button><button id="nextBtn" class="btn btn--primary" disabled>Próxima →</button><button id="finishBtn" class="btn btn--success hidden" disabled>✅ Finalizar</button></div>
+              <div id="profileResult" class="profile-result hidden"><h3>🎯 Seu Perfil</h3><div class="profile-card"><div id="profileIcon" class="profile-icon">🎯</div><h4 id="profileName">Perfil</h4><p id="profileDesc">Descrição do perfil</p><div id="profileStrengths" class="profile-strengths"></div></div><button id="continueBtn" class="btn btn--primary">Continuar →</button></div>
+            </div>
+          </div>
+        </div>
+        <div id="phase2" class="phase-container"><div class="phase-content"><h2>🏭 Segmento</h2><p>Em desenvolvimento...</p><button id="nextPhase2" class="btn btn--primary">Continuar →</button></div></div>
+        <div id="phase3" class="phase-container"><div class="phase-content"><h2>👑 CEO</h2><p>Em desenvolvimento...</p><button id="nextPhase3" class="btn btn--primary">Continuar →</button></div></div>
+        <div id="phase4" class="phase-container"><div class="phase-content"><h2>🏢 Sede</h2><p>Em desenvolvimento...</p><button id="nextPhase4" class="btn btn--primary">Continuar →</button></div></div>
+        <div id="phase5" class="phase-container"><div class="phase-content"><h2>💻 Equipamentos</h2><p>Em desenvolvimento...</p><button id="finishAct" class="btn btn--success">🎉 Finalizar Ato 1</button></div></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
