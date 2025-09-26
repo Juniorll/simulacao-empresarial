@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATO 1 - Simulação Empresarial</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-container hidden" id="progressContainer">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">Etapa 1 de 8</div>
+    </div>
+
+    <!-- Login Screen -->
+    <div class="screen active" id="loginScreen">
+        <div class="container">
+            <div class="login-card">
+                <h1>ATO 1 - Simulação Empresarial</h1>
+                <p>Entre com suas credenciais para começar o jogo</p>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email</label>
+                        <input type="email" id="email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password">Senha</label>
+                        <input type="password" id="password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn--primary btn--full-width">Entrar</button>
+                </form>
+                <div class="teacher-access">
+                    <button type="button" class="btn btn--outline btn--sm" id="teacherBtn">Acesso Professor</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Selection Screen -->
+    <div class="screen" id="teamScreen">
+        <div class="container">
+            <h2>Escolha da Equipe</h2>
+            <div class="team-options">
+                <div class="card" id="createTeamCard">
+                    <div class="card__body">
+                        <h3>Criar Nova Equipe</h3>
+                        <p>Seja o líder e crie uma nova equipe</p>
+                        <div class="form-group">
+                            <label class="form-label" for="teamName">Nome da Equipe</label>
+                            <input type="text" id="teamName" class="form-control" placeholder="Digite o nome da sua equipe">
+                        </div>
+                        <button class="btn btn--primary" id="createTeamBtn">Criar Equipe</button>
+                    </div>
+                </div>
+                <div class="card" id="joinTeamCard">
+                    <div class="card__body">
+                        <h3>Entrar em Equipe</h3>
+                        <p>Junte-se a uma equipe existente</p>
+                        <div class="form-group">
+                            <label class="form-label" for="teamCode">Código da Equipe</label>
+                            <input type="text" id="teamCode" class="form-control" placeholder="Digite o código da equipe">
+                        </div>
+                        <button class="btn btn--primary" id="joinTeamBtn">Entrar na Equipe</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Waiting Screen -->
+    <div class="screen" id="waitingScreen">
+        <div class="container">
+            <div class="team-info">
+                <h2 id="currentTeamName">Equipe: </h2>
+                <p>Código da equipe: <strong id="currentTeamCode"></strong></p>
+                <div class="members-list">
+                    <h3>Membros da Equipe</h3>
+                    <div id="membersList"></div>
+                </div>
+                <div class="leader-actions hidden" id="leaderActions">
+                    <button class="btn btn--primary" id="startGameBtn">Iniciar Jogo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="screen" id="quizScreen">
+        <div class="container">
+            <h2>Questionário de Perfil Profissional</h2>
+            <div class="quiz-container">
+                <div class="question-card" id="questionCard">
+                    <div class="question-number" id="questionNumber">Pergunta 1 de 10</div>
+                    <h3 id="questionText"></h3>
+                    <div class="options-container" id="optionsContainer"></div>
+                    <div class="quiz-navigation">
+                        <button class="btn btn--outline" id="prevBtn" disabled>Anterior</button>
+                        <button class="btn btn--primary" id="nextBtn" disabled>Próxima</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Results Screen -->
+    <div class="screen" id="profileScreen">
+        <div class="container">
+            <h2>Resultados dos Perfis Profissionais</h2>
+            <div class="profile-results">
+                <div class="my-profile">
+                    <h3>Seu Perfil</h3>
+                    <div class="profile-card" id="myProfileCard"></div>
+                </div>
+                <div class="team-profiles">
+                    <h3>Perfis da Equipe</h3>
+                    <div id="teamProfilesList"></div>
+                </div>
+                <div class="leader-actions hidden" id="profileLeaderActions">
+                    <button class="btn btn--primary" id="continueToSegmentBtn">Continuar para Escolha do Segmento</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Segment Selection Screen -->
+    <div class="screen" id="segmentScreen">
+        <div class="container">
+            <h2>Escolha do Segmento de Empresa</h2>
+            <div class="segments-grid" id="segmentsGrid"></div>
+            <div class="voting-section">
+                <button class="btn btn--primary" id="voteSegmentBtn" disabled>Votar no Segmento Selecionado</button>
+            </div>
+            <div class="voting-results hidden" id="segmentResults">
+                <h3>Resultado da Votação</h3>
+                <div id="segmentResultsContent"></div>
+                <div class="leader-actions hidden" id="segmentLeaderActions">
+                    <button class="btn btn--primary" id="continueToCeoBtn">Continuar para Eleição do CEO</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CEO Election Screen -->
+    <div class="screen" id="ceoScreen">
+        <div class="container">
+            <h2>Eleição do CEO</h2>
+            <p>Vote secretamente em quem deve ser o CEO da sua equipe</p>
+            <div class="candidates-list" id="candidatesList"></div>
+            <div class="voting-section">
+                <button class="btn btn--primary" id="voteCeoBtn" disabled>Confirmar Voto</button>
+            </div>
+            <div class="ceo-results hidden" id="ceoResults">
+                <h3>Resultado da Eleição</h3>
+                <div id="ceoResultsContent"></div>
+                <div class="satisfaction-section" id="satisfactionSection">
+                    <h4>Avalie sua satisfação com o resultado:</h4>
+                    <div class="satisfaction-scale">
+                        <input type="range" min="1" max="10" value="5" id="satisfactionSlider">
+                        <div class="scale-labels">
+                            <span>Muito Insatisfeito</span>
+                            <span>Muito Satisfeito</span>
+                        </div>
+                    </div>
+                    <button class="btn btn--primary" id="submitSatisfactionBtn">Enviar Avaliação</button>
+                </div>
+                <div class="ceo-actions hidden" id="ceoActions">
+                    <button class="btn btn--primary" id="continueToPositionsBtn">Definir Cargos da Equipe</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Position Assignment Screen -->
+    <div class="screen" id="positionScreen">
+        <div class="container">
+            <h2>Definição de Cargos</h2>
+            <div class="positions-assignment" id="positionsAssignment">
+                <div class="team-members" id="teamMembersForPositions"></div>
+                <div class="available-positions" id="availablePositions"></div>
+                <button class="btn btn--primary" id="confirmPositionsBtn">Confirmar Cargos</button>
+            </div>
+            <div class="positions-results hidden" id="positionsResults">
+                <h3>Cargos Definidos</h3>
+                <div id="positionsResultsContent"></div>
+                <div class="satisfaction-section" id="positionsSatisfactionSection">
+                    <h4>Avalie sua satisfação com os cargos definidos:</h4>
+                    <div class="satisfaction-scale">
+                        <input type="range" min="1" max="10" value="5" id="positionsSatisfactionSlider">
+                        <div class="scale-labels">
+                            <span>Muito Insatisfeito</span>
+                            <span>Muito Satisfeito</span>
+                        </div>
+                    </div>
+                    <button class="btn btn--primary" id="submitPositionsSatisfactionBtn">Enviar Avaliação</button>
+                </div>
+                <div class="continue-actions hidden" id="continueToHiringActions">
+                    <button class="btn btn--primary" id="continueToHiringBtn">Continuar para Contratações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hiring Screen -->
+    <div class="screen" id="hiringScreen">
+        <div class="container">
+            <h2>Processo de Contratação</h2>
+            <div class="hiring-phase-1" id="hiringPhase1">
+                <h3>Suas Responsabilidades como <span id="memberPosition"></span></h3>
+                <p id="positionDescription"></p>
+                <h4>Selecione as contratações necessárias para sua área:</h4>
+                <div class="hiring-options" id="hiringOptions"></div>
+                <button class="btn btn--primary" id="submitHiringNeedsBtn">Enviar Necessidades</button>
+            </div>
+            <div class="hiring-phase-2 hidden" id="hiringPhase2">
+                <h3>Decisão Final do CEO</h3>
+                <div class="budget-info">
+                    <h4>Orçamento Disponível: R$ <span id="availableBudget">50.000</span></h4>
+                </div>
+                <div class="team-requests" id="teamRequests"></div>
+                <div class="final-decisions" id="finalDecisions"></div>
+                <button class="btn btn--primary" id="confirmHiringBtn">Confirmar Contratações</button>
+            </div>
+            <div class="hiring-results hidden" id="hiringResults">
+                <h3>Organograma Final</h3>
+                <div id="finalOrganogram"></div>
+                <div class="satisfaction-section" id="hiringSatisfactionSection">
+                    <h4>Avalie as decisões do CEO:</h4>
+                    <div class="satisfaction-scale">
+                        <input type="range" min="1" max="10" value="5" id="hiringSatisfactionSlider">
+                        <div class="scale-labels">
+                            <span>Muito Insatisfeito</span>
+                            <span>Muito Satisfeito</span>
+                        </div>
+                    </div>
+                    <button class="btn btn--primary" id="submitHiringSatisfactionBtn">Enviar Avaliação</button>
+                </div>
+                <div class="continue-actions hidden" id="continueToReportActions">
+                    <button class="btn btn--primary" id="continueToReportBtn">Ver Relatório Final</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Report Screen -->
+    <div class="screen" id="reportScreen">
+        <div class="container">
+            <h2>Relatório Final - ATO 1</h2>
+            <div class="final-report" id="finalReport">
+                <div class="total-score">
+                    <h3>Pontuação Total da Equipe: <span id="totalScore">0</span> pontos</h3>
+                </div>
+                <div class="score-breakdown" id="scoreBreakdown"></div>
+                <div class="team-ranking" id="teamRanking"></div>
+                <button class="btn btn--secondary" id="restartBtn">Reiniciar Jogo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Panel -->
+    <div class="screen" id="teacherScreen">
+        <div class="container">
+            <h2>Painel do Professor</h2>
+            <div class="teacher-controls">
+                <div class="control-buttons">
+                    <button class="btn btn--primary" id="toggleScoresBtn">Revelar/Ocultar Pontuações</button>
+                    <button class="btn btn--warning" id="resetGameBtn">Zerar Todas as Informações</button>
+                    <button class="btn btn--outline" id="backToLoginBtn">Voltar ao Login</button>
+                </div>
+                <div class="teams-overview" id="teamsOverview"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Password Modal -->
+    <div class="modal hidden" id="teacherModal">
+        <div class="modal-content">
+            <h3>Acesso do Professor</h3>
+            <div class="form-group">
+                <label class="form-label" for="teacherPassword">Senha do Professor</label>
+                <input type="password" id="teacherPassword" class="form-control">
+                <small>Senha padrão: professor123</small>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn--outline" id="cancelTeacherBtn">Cancelar</button>
+                <button class="btn btn--primary" id="confirmTeacherBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification System -->
+    <div class="notification hidden" id="notification">
+        <div class="notification-content" id="notificationContent"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
