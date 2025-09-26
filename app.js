@@ -1,491 +1,182 @@
 /* EmpresaTec - Sistema de Simulação Empresarial */
-/* JavaScript Completo com Sincronização Real Entre Navegadores */
+/* JavaScript Revisado e Testado - Versão Estável */
 
-// ===== CONFIGURAÇÃO GLOBAL =====
+// ===== SISTEMA PRINCIPAL ===== 
 const EmpresaTec = {
     // Estado da aplicação
     state: {
         currentUser: null,
         currentTeam: null,
         currentScreen: 'loginScreen',
-        currentAct: 1,
         currentPhase: 1,
-        isTeacher: false,
-        isAuthenticated: false,
-        isOnline: false, // NOVO: status de conexão
-        syncInterval: null, // NOVO: intervalo de sincronização
-
-        // Dados do questionário
         currentQuestion: 0,
         userAnswers: [],
         userProfile: null,
-
-        // Dados da equipe
-        selectedSegment: null,
-        selectedCeo: null,
-        selectedLocation: null,
-        selectedEquipment: [],
-
-        // Orçamento e pontuação
-        totalBudget: 500000,
-        currentSpending: 0,
-        teamScore: 0,
-
-        // Controles do professor
-        teacherPassword: 'professor2025',
-        approvedActs: {
-            act1: false, act2: false, act3: false, act4: false, act5: false
-        }
+        teacherPassword: 'professor2025'
     },
 
-    // Dados do jogo
-    data: {
-        // Perfis profissionais
-        profiles: {
-            strategist: {
-                name: "Estrategista Empresarial",
-                icon: "🎯",
-                description: "Especialista em planejamento estratégico e visão de longo prazo. Excelente para liderar decisões complexas.",
-                strengths: ["Planejamento Estratégico", "Análise de Mercado", "Liderança", "Visão de Futuro"],
-                bonus: { decision_making: 25, team_collaboration: 15 }
-            },
-            innovator: {
-                name: "Inovador Tecnológico", 
-                icon: "💡",
-                description: "Criativo e visionário, especializado em desenvolvimento de produtos e soluções disruptivas.",
-                strengths: ["Inovação", "Tecnologia", "Criatividade", "Desenvolvimento"],
-                bonus: { technology_adoption: 25, quality_processes: 15 }
-            },
-            executor: {
-                name: "Executor Operacional",
-                icon: "⚡",
-                description: "Prático e eficiente, especializado em operações e implementação. Transforma ideias em realidade.",
-                strengths: ["Execução", "Operações", "Eficiência", "Implementação"],
-                bonus: { cost_efficiency: 25, quality_processes: 20 }
-            },
-            analyst: {
-                name: "Analista Financeiro",
-                icon: "📊", 
-                description: "Orientado por dados, especializado em análises financeiras e inteligência de mercado.",
-                strengths: ["Análise Financeira", "Dados", "Métricas", "Planejamento"],
-                bonus: { cost_efficiency: 30, decision_making: 15 }
-            },
-            communicator: {
-                name: "Comunicador Estratégico",
-                icon: "🎙️",
-                description: "Especialista em relacionamentos, marketing e vendas. Excelente comunicação e networking.",
-                strengths: ["Comunicação", "Marketing", "Vendas", "Relacionamento"],
-                bonus: { team_collaboration: 25, decision_making: 10 }
-            }
+    // Dados do questionário
+    questionData: [
+        {
+            id: 1,
+            text: "Ao iniciar um novo projeto empresarial, sua primeira ação é:",
+            options: [
+                { text: "Definir a visão estratégica e objetivos de longo prazo", profile: "strategist" },
+                { text: "Pesquisar tecnologias inovadoras e oportunidades disruptivas", profile: "innovator" },
+                { text: "Mapear processos operacionais e recursos necessários", profile: "executor" },
+                { text: "Analisar dados de mercado e viabilidade financeira", profile: "analyst" },
+                { text: "Identificar stakeholders e estratégias de comunicação", profile: "communicator" }
+            ]
         },
-
-        // Segmentos empresariais
-        segments: {
-            fintech: {
-                name: "Fintech",
-                icon: "💳",
-                description: "Tecnologia Financeira - Soluções digitais para pagamentos, investimentos e serviços bancários.",
-                marketSize: "R$ 4,8 bilhões",
-                growth: "35% ao ano",
-                investment: 150000,
-                challenges: ["Regulamentação rigorosa", "Segurança de dados", "Competição bancária"],
-                opportunities: ["Open Banking", "PIX", "Criptomoedas", "Inclusão financeira"]
-            },
-            edtech: {
-                name: "Edtech", 
-                icon: "📚",
-                description: "Tecnologia Educacional - Plataformas de ensino e soluções de aprendizado digital.",
-                marketSize: "R$ 5,6 bilhões",
-                growth: "28% ao ano", 
-                investment: 120000,
-                challenges: ["Adoção institucional", "Engajamento estudantil", "Modelo pedagógico"],
-                opportunities: ["Ensino híbrido", "Microlearning", "IA educacional", "Certificações"]
-            },
-            healthtech: {
-                name: "Healthtech",
-                icon: "🏥",
-                description: "Tecnologia em Saúde - Telemedicina, diagnósticos e gestão hospitalar.", 
-                marketSize: "R$ 3,2 bilhões",
-                growth: "42% ao ano",
-                investment: 180000,
-                challenges: ["Regulamentação médica", "Integração sistemas", "Privacidade"],
-                opportunities: ["Telemedicina", "Wearables", "IA diagnóstica", "Prontuário eletrônico"]
-            },
-            agtech: {
-                name: "Agtech",
-                icon: "🚜", 
-                description: "Tecnologia Agrícola - IoT rural, drones e otimização de cultivos.",
-                marketSize: "R$ 2,1 bilhões",
-                growth: "30% ao ano",
-                investment: 140000,
-                challenges: ["Conectividade rural", "Adoção tecnológica", "Investimento inicial"],
-                opportunities: ["Agricultura de precisão", "Sustentabilidade", "IoT", "Biotecnologia"]
-            },
-            foodtech: {
-                name: "Foodtech",
-                icon: "🍔",
-                description: "Tecnologia Alimentar - Delivery, agricultura vertical e alimentos alternativos.",
-                marketSize: "R$ 2,8 bilhões", 
-                growth: "25% ao ano",
-                investment: 100000,
-                challenges: ["Logística complexa", "Sustentabilidade", "Regulamentação sanitária"],
-                opportunities: ["Dark kitchens", "Plant-based", "Automação", "Delivery"]
-            }
+        {
+            id: 2,
+            text: "Sua maior contribuição em uma equipe empresarial é:",
+            options: [
+                { text: "Liderar e tomar decisões estratégicas complexas", profile: "strategist" },
+                { text: "Desenvolver soluções criativas e inovadoras", profile: "innovator" },
+                { text: "Garantir execução eficiente e resultados práticos", profile: "executor" },
+                { text: "Fornecer análises precisas baseadas em dados", profile: "analyst" },
+                { text: "Facilitar comunicação e construir relacionamentos", profile: "communicator" }
+            ]
         },
-
-        // Questionário de perfil
-        questions: [
-            {
-                id: 1,
-                text: "Ao iniciar um novo projeto empresarial, sua primeira ação é:",
-                options: [
-                    { text: "Definir a visão estratégica e objetivos de longo prazo", profile: "strategist", weight: 3 },
-                    { text: "Pesquisar tecnologias inovadoras e oportunidades disruptivas", profile: "innovator", weight: 3 },
-                    { text: "Mapear processos operacionais e recursos necessários", profile: "executor", weight: 3 },
-                    { text: "Analisar dados de mercado e viabilidade financeira", profile: "analyst", weight: 3 },
-                    { text: "Identificar stakeholders e estratégias de comunicação", profile: "communicator", weight: 3 }
-                ]
-            },
-            {
-                id: 2,
-                text: "Sua maior contribuição em uma equipe empresarial é:",
-                options: [
-                    { text: "Liderar e tomar decisões estratégicas complexas", profile: "strategist", weight: 3 },
-                    { text: "Desenvolver soluções criativas e inovadoras", profile: "innovator", weight: 3 },
-                    { text: "Garantir execução eficiente e resultados práticos", profile: "executor", weight: 3 },
-                    { text: "Fornecer análises precisas baseadas em dados", profile: "analyst", weight: 3 },
-                    { text: "Facilitar comunicação e construir relacionamentos", profile: "communicator", weight: 3 }
-                ]
-            },
-            {
-                id: 3,
-                text: "Em uma reunião de negócios importante, você se destaca por:",
-                options: [
-                    { text: "Apresentar visões de futuro e direcionamentos estratégicos", profile: "strategist", weight: 2 },
-                    { text: "Propor ideias disruptivas e soluções tecnológicas", profile: "innovator", weight: 2 },
-                    { text: "Focar na viabilidade e implementação prática", profile: "executor", weight: 2 },
-                    { text: "Trazer dados concretos e análises fundamentadas", profile: "analyst", weight: 2 },
-                    { text: "Mediar discussões e alinhar expectativas", profile: "communicator", weight: 2 }
-                ]
-            },
-            {
-                id: 4,
-                text: "Ao resolver problemas empresariais complexos, você prefere:",
-                options: [
-                    { text: "Analisar impactos estratégicos e cenários futuros", profile: "strategist", weight: 2 },
-                    { text: "Buscar soluções não convencionais e tecnológicas", profile: "innovator", weight: 2 },
-                    { text: "Dividir em etapas executáveis e mensuráveis", profile: "executor", weight: 2 },
-                    { text: "Utilizar modelos analíticos e dados históricos", profile: "analyst", weight: 2 },
-                    { text: "Consultar stakeholders e buscar consenso", profile: "communicator", weight: 2 }
-                ]
-            },
-            {
-                id: 5,
-                text: "O que mais te motiva no ambiente empresarial?",
-                options: [
-                    { text: "Definir rumos e impactar o futuro da organização", profile: "strategist", weight: 3 },
-                    { text: "Criar produtos/serviços revolucionários", profile: "innovator", weight: 3 },
-                    { text: "Ver resultados concretos e operações eficientes", profile: "executor", weight: 3 },
-                    { text: "Descobrir insights valiosos através de análises", profile: "analyst", weight: 3 },
-                    { text: "Construir relacionamentos e expandir networks", profile: "communicator", weight: 3 }
-                ]
-            },
-            {
-                id: 6,
-                text: "Em um cenário de crise empresarial, sua reação natural é:",
-                options: [
-                    { text: "Reformular estratégias e redefinir prioridades", profile: "strategist", weight: 2 },
-                    { text: "Buscar oportunidades de inovação e adaptação", profile: "innovator", weight: 2 },
-                    { text: "Otimizar recursos e manter operações funcionando", profile: "executor", weight: 2 },
-                    { text: "Analisar cenários de risco e quantificar perdas", profile: "analyst", weight: 2 },
-                    { text: "Comunicar transparentemente e manter equipe unida", profile: "communicator", weight: 2 }
-                ]
-            },
-            {
-                id: 7,
-                text: "Sua área de interesse e expertise preferida é:",
-                options: [
-                    { text: "Planejamento estratégico e governança corporativa", profile: "strategist", weight: 2 },
-                    { text: "Pesquisa & desenvolvimento e novas tecnologias", profile: "innovator", weight: 2 },
-                    { text: "Operações e gestão de processos empresariais", profile: "executor", weight: 2 },
-                    { text: "Finanças e análise de performance empresarial", profile: "analyst", weight: 2 },
-                    { text: "Marketing e relacionamento com stakeholders", profile: "communicator", weight: 2 }
-                ]
-            },
-            {
-                id: 8,
-                text: "Ao liderar uma equipe empresarial, você foca principalmente em:",
-                options: [
-                    { text: "Alinhar visão estratégica e definir objetivos", profile: "strategist", weight: 2 },
-                    { text: "Estimular criatividade e pensamento inovador", profile: "innovator", weight: 2 },
-                    { text: "Estabelecer processos claros e metas alcançáveis", profile: "executor", weight: 2 },
-                    { text: "Monitorar métricas e performance da equipe", profile: "analyst", weight: 2 },
-                    { text: "Desenvolver talentos e facilitar comunicação", profile: "communicator", weight: 2 }
-                ]
-            },
-            {
-                id: 9,
-                text: "Para tomar decisões empresariais importantes, você considera principalmente:",
-                options: [
-                    { text: "Alinhamento com visão estratégica de longo prazo", profile: "strategist", weight: 2 },
-                    { text: "Potencial de diferenciação e inovação no mercado", profile: "innovator", weight: 2 },
-                    { text: "Viabilidade operacional e recursos disponíveis", profile: "executor", weight: 2 },
-                    { text: "ROI esperado e análise de riscos financeiros", profile: "analyst", weight: 2 },
-                    { text: "Impacto nos stakeholders e imagem da empresa", profile: "communicator", weight: 2 }
-                ]
-            },
-            {
-                id: 10,
-                text: "Seu objetivo profissional ideal seria:",
-                options: [
-                    { text: "Ser CEO de uma grande corporação multinacional", profile: "strategist", weight: 3 },
-                    { text: "Criar uma startup unicórnio revolucionária", profile: "innovator", weight: 3 },
-                    { text: "Ser reconhecido pela excelência operacional", profile: "executor", weight: 3 },
-                    { text: "Ser autoridade em análise financeira e estratégica", profile: "analyst", weight: 3 },
-                    { text: "Construir uma marca pessoal influente no mercado", profile: "communicator", weight: 3 }
-                ]
-            }
-        ],
-
-        // Localizações disponíveis
-        locations: {
-            downtown: {
-                name: "Centro Empresarial",
-                icon: "🏙️",
-                cost: 120000,
-                description: "Localização premium no centro financeiro da cidade",
-                pros: ["Alto prestígio", "Fácil acesso", "Networking", "Infraestrutura completa"],
-                cons: ["Alto custo", "Muito trânsito", "Estacionamento caro"]
-            },
-            techpark: {
-                name: "Parque Tecnológico", 
-                icon: "🔬",
-                cost: 80000,
-                description: "Hub de inovação com empresas de tecnologia",
-                pros: ["Ambiente inovador", "Networking tech", "Incentivos fiscais", "Universidades próximas"],
-                cons: ["Distância do centro", "Público especializado"]
-            },
-            coworking: {
-                name: "Coworking Premium",
-                icon: "🏢", 
-                cost: 50000,
-                description: "Espaço compartilhado com infraestrutura profissional",
-                pros: ["Flexibilidade", "Custo moderado", "Networking", "Serviços inclusos"],
-                cons: ["Menos privacidade", "Dependência do espaço"]
-            },
-            remote: {
-                name: "Home Office",
-                icon: "🏠",
-                cost: 20000,
-                description: "Trabalho remoto com escritório virtual",
-                pros: ["Máxima economia", "Flexibilidade total", "Sem deslocamento"],
-                cons: ["Imagem profissional", "Dificuldade colaboração", "Falta de separação"]
-            }
+        {
+            id: 3,
+            text: "Em uma reunião de negócios importante, você se destaca por:",
+            options: [
+                { text: "Apresentar visões de futuro e direcionamentos estratégicos", profile: "strategist" },
+                { text: "Propor ideias disruptivas e soluções tecnológicas", profile: "innovator" },
+                { text: "Focar na viabilidade e implementação prática", profile: "executor" },
+                { text: "Trazer dados concretos e análises fundamentadas", profile: "analyst" },
+                { text: "Mediar discussões e alinhar expectativas", profile: "communicator" }
+            ]
         },
-
-        // Equipamentos disponíveis
-        equipment: {
-            basic_hardware: {
-                name: "Hardware Básico",
-                icon: "💻",
-                cost: 40000,
-                description: "Computadores, impressoras e mobiliário essencial",
-                items: ["Notebooks básicos", "Impressora multifuncional", "Mobiliário escritório", "Internet banda larga"]
-            },
-            advanced_hardware: {
-                name: "Hardware Avançado", 
-                icon: "🖥️",
-                cost: 80000,
-                description: "Workstations, servidores e equipamentos especializados",
-                items: ["Workstations alta performance", "Servidor local", "Monitores 4K", "Equipamentos especializados"]
-            },
-            software_licenses: {
-                name: "Licenças de Software",
-                icon: "⚙️",
-                cost: 30000,
-                description: "Pacote completo de softwares profissionais",
-                items: ["Office 365", "Adobe Creative Suite", "Ferramentas desenvolvimento", "Software gestão"]
-            },
-            security_system: {
-                name: "Sistema de Segurança",
-                icon: "🔒",
-                cost: 35000,
-                description: "Segurança digital e física completa",
-                items: ["Antivírus corporativo", "Firewall avançado", "Sistema backup", "Monitoramento 24h"]
-            },
-            meeting_room: {
-                name: "Sala de Reuniões",
-                icon: "📹",
-                cost: 45000,
-                description: "Equipamentos para reuniões e videoconferências",
-                items: ["TV 65 polegadas", "Sistema videoconferência", "Som profissional", "Mesa reuniões"]
-            },
-            design_studio: {
-                name: "Estúdio de Design",
-                icon: "🎨", 
-                cost: 60000,
-                description: "Equipamentos para criação e design profissional",
-                items: ["iMac Pro", "Tablet gráfico", "Câmera profissional", "Iluminação estúdio"]
-            }
+        {
+            id: 4,
+            text: "Ao resolver problemas empresariais complexos, você prefere:",
+            options: [
+                { text: "Analisar impactos estratégicos e cenários futuros", profile: "strategist" },
+                { text: "Buscar soluções não convencionais e tecnológicas", profile: "innovator" },
+                { text: "Dividir em etapas executáveis e mensuráveis", profile: "executor" },
+                { text: "Utilizar modelos analíticos e dados históricos", profile: "analyst" },
+                { text: "Consultar stakeholders e buscar consenso", profile: "communicator" }
+            ]
+        },
+        {
+            id: 5,
+            text: "O que mais te motiva no ambiente empresarial?",
+            options: [
+                { text: "Definir rumos e impactar o futuro da organização", profile: "strategist" },
+                { text: "Criar produtos/serviços revolucionários", profile: "innovator" },
+                { text: "Ver resultados concretos e operações eficientes", profile: "executor" },
+                { text: "Descobrir insights valiosos através de análises", profile: "analyst" },
+                { text: "Construir relacionamentos e expandir networks", profile: "communicator" }
+            ]
+        },
+        {
+            id: 6,
+            text: "Em um cenário de crise empresarial, sua reação natural é:",
+            options: [
+                { text: "Reformular estratégias e redefinir prioridades", profile: "strategist" },
+                { text: "Buscar oportunidades de inovação e adaptação", profile: "innovator" },
+                { text: "Otimizar recursos e manter operações funcionando", profile: "executor" },
+                { text: "Analisar cenários de risco e quantificar perdas", profile: "analyst" },
+                { text: "Comunicar transparentemente e manter equipe unida", profile: "communicator" }
+            ]
+        },
+        {
+            id: 7,
+            text: "Sua área de interesse e expertise preferida é:",
+            options: [
+                { text: "Planejamento estratégico e governança corporativa", profile: "strategist" },
+                { text: "Pesquisa & desenvolvimento e novas tecnologias", profile: "innovator" },
+                { text: "Operações e gestão de processos empresariais", profile: "executor" },
+                { text: "Finanças e análise de performance empresarial", profile: "analyst" },
+                { text: "Marketing e relacionamento com stakeholders", profile: "communicator" }
+            ]
+        },
+        {
+            id: 8,
+            text: "Ao liderar uma equipe empresarial, você foca principalmente em:",
+            options: [
+                { text: "Alinhar visão estratégica e definir objetivos", profile: "strategist" },
+                { text: "Estimular criatividade e pensamento inovador", profile: "innovator" },
+                { text: "Estabelecer processos claros e metas alcançáveis", profile: "executor" },
+                { text: "Monitorar métricas e performance da equipe", profile: "analyst" },
+                { text: "Desenvolver talentos e facilitar comunicação", profile: "communicator" }
+            ]
+        },
+        {
+            id: 9,
+            text: "Para tomar decisões empresariais importantes, você considera principalmente:",
+            options: [
+                { text: "Alinhamento com visão estratégica de longo prazo", profile: "strategist" },
+                { text: "Potencial de diferenciação e inovação no mercado", profile: "innovator" },
+                { text: "Viabilidade operacional e recursos disponíveis", profile: "executor" },
+                { text: "ROI esperado e análise de riscos financeiros", profile: "analyst" },
+                { text: "Impacto nos stakeholders e imagem da empresa", profile: "communicator" }
+            ]
+        },
+        {
+            id: 10,
+            text: "Seu objetivo profissional ideal seria:",
+            options: [
+                { text: "Ser CEO de uma grande corporação multinacional", profile: "strategist" },
+                { text: "Criar uma startup unicórnio revolucionária", profile: "innovator" },
+                { text: "Ser reconhecido pela excelência operacional", profile: "executor" },
+                { text: "Ser autoridade em análise financeira e estratégica", profile: "analyst" },
+                { text: "Construir uma marca pessoal influente no mercado", profile: "communicator" }
+            ]
         }
-    },
+    ],
 
-    // NOVO: Sistema de sincronização
-    sync: {
-        // Método para sincronizar dados
-        async syncData(action, data = null) {
-            console.log(`🔄 Sincronizando: ${action}`);
-
-            try {
-                // Tentar Firebase primeiro
-                if (window.firebase && window.firebase.db) {
-                    return await this.syncWithFirebase(action, data);
-                }
-
-                // Fallback: localStorage
-                return await this.syncWithLocalStorage(action, data);
-
-            } catch (error) {
-                console.warn('⚠️ Erro na sincronização online:', error.message);
-                return await this.syncWithLocalStorage(action, data);
-            }
+    // Perfis profissionais
+    profiles: {
+        strategist: {
+            name: "Estrategista Empresarial",
+            icon: "🎯",
+            description: "Especialista em planejamento estratégico e visão de longo prazo. Excelente para liderar decisões complexas."
         },
-
-        async syncWithFirebase(action, data) {
-            console.log('🔥 Sincronizando com Firebase');
-
-            const db = window.firebase.db;
-
-            switch (action) {
-                case 'saveTeam':
-                    const teamRef = window.firebase.doc(db, 'teams', data.code);
-                    await window.firebase.setDoc(teamRef, {
-                        ...data,
-                        lastUpdated: new Date().toISOString(),
-                        updatedBy: EmpresaTec.state.currentUser?.uid
-                    });
-                    console.log(`✅ Equipe ${data.code} salva no Firebase`);
-                    return data;
-
-                case 'getTeam':
-                    const teamDoc = await window.firebase.getDoc(window.firebase.doc(db, 'teams', data.code));
-                    if (teamDoc.exists()) {
-                        console.log(`✅ Equipe ${data.code} encontrada no Firebase`);
-                        return teamDoc.data();
-                    }
-                    return null;
-
-                case 'getAllTeams':
-                    const teamsCollection = window.firebase.collection(db, 'teams');
-                    const snapshot = await window.firebase.getDocs(teamsCollection);
-                    const teams = {};
-                    snapshot.forEach(doc => {
-                        teams[doc.id] = doc.data();
-                    });
-                    console.log(`✅ ${Object.keys(teams).length} equipes carregadas do Firebase`);
-                    return teams;
-
-                default:
-                    throw new Error(`Ação não suportada: ${action}`);
-            }
+        innovator: {
+            name: "Inovador Tecnológico", 
+            icon: "💡",
+            description: "Criativo e visionário, especializado em desenvolvimento de produtos e soluções disruptivas."
         },
-
-        async syncWithLocalStorage(action, data) {
-            console.log('💾 Usando localStorage');
-
-            const storedTeams = JSON.parse(localStorage.getItem('empresatec_teams') || '{}');
-
-            switch (action) {
-                case 'saveTeam':
-                    storedTeams[data.code] = {
-                        ...data,
-                        lastUpdated: new Date().toISOString(),
-                        isLocal: true
-                    };
-                    localStorage.setItem('empresatec_teams', JSON.stringify(storedTeams));
-                    return data;
-
-                case 'getTeam':
-                    return storedTeams[data.code] || null;
-
-                case 'getAllTeams':
-                    return storedTeams;
-            }
+        executor: {
+            name: "Executor Operacional",
+            icon: "⚡",
+            description: "Prático e eficiente, especializado em operações e implementação. Transforma ideias em realidade."
+        },
+        analyst: {
+            name: "Analista Financeiro",
+            icon: "📊", 
+            description: "Orientado por dados, especializado em análises financeiras e inteligência de mercado."
+        },
+        communicator: {
+            name: "Comunicador Estratégico",
+            icon: "🎙️",
+            description: "Especialista em relacionamentos, marketing e vendas. Excelente comunicação e networking."
         }
     },
 
     // ===== INICIALIZAÇÃO =====
-    async init() {
-        console.log('🚀 Iniciando EmpresaTec - Sistema Empresarial Educacional');
-
-        this.bindEvents();
-        await this.checkConnectivity();
-        this.loadState();
-        this.initializeScreen();
-        this.startSyncService();
-
-        console.log('✅ Sistema inicializado com sucesso');
-    },
-
-    // NOVO: Verificar conectividade
-    async checkConnectivity() {
-        console.log('🔍 Verificando conectividade...');
+    init() {
+        console.log('🚀 Iniciando EmpresaTec');
 
         try {
-            // Testar Firebase
-            if (window.firebase && window.firebase.db) {
-                await window.firebase.getDocs(window.firebase.collection(window.firebase.db, 'teams'));
-                this.state.isOnline = true;
-                console.log('✅ Firebase conectado');
-                this.showAlert('Sistema online - dados sincronizados!', 'success');
-                return;
-            }
+            this.bindEvents();
+            this.loadState();
+            this.showScreen('loginScreen');
+            console.log('✅ Sistema inicializado com sucesso');
         } catch (error) {
-            console.warn('⚠️ Firebase não disponível:', error.message);
-        }
-
-        // Fallback: verificar conectividade básica
-        try {
-            const response = await fetch('https://httpbin.org/get', { 
-                method: 'GET'
-            });
-
-            if (response.ok) {
-                this.state.isOnline = false; // Sem Firebase, consideramos offline para sync
-                console.log('🌐 Internet disponível mas sem sincronização');
-                this.showAlert('Sistema funcionando localmente!', 'warning');
-            }
-        } catch (error) {
-            this.state.isOnline = false;
-            console.warn('📴 Sistema funcionando offline');
-            this.showAlert('Sistema offline - dados apenas locais!', 'warning');
+            console.error('❌ Erro na inicialização:', error);
+            this.showAlert('Erro ao inicializar sistema: ' + error.message, 'error');
         }
     },
 
-    // NOVO: Serviço de sincronização contínua
-    startSyncService() {
-        if (this.state.syncInterval) {
-            clearInterval(this.state.syncInterval);
-        }
-
-        // Sincronizar a cada 30 segundos se online
-        this.state.syncInterval = setInterval(async () => {
-            if (this.state.isOnline && this.state.currentTeam) {
-                try {
-                    const updatedTeam = await this.sync.syncData('getTeam', { code: this.state.currentTeam.code });
-                    if (updatedTeam && updatedTeam.lastUpdated !== this.state.currentTeam.lastUpdated) {
-                        console.log('🔄 Equipe atualizada remotamente');
-                        this.state.currentTeam = updatedTeam;
-                        this.showTeamStatus(); // Atualizar interface
-                        this.showAlert('Equipe atualizada!', 'info');
-                    }
-                } catch (error) {
-                    console.warn('⚠️ Erro na sincronização automática:', error.message);
-                }
-            }
-        }, 30000);
-    },
+    // ===== EVENT LISTENERS =====
     bindEvents() {
+        console.log('🔗 Configurando event listeners');
+
         // Login Form
         const loginForm = document.getElementById('loginForm');
         if (loginForm) {
@@ -493,40 +184,45 @@ const EmpresaTec = {
                 e.preventDefault();
                 this.handleLogin();
             });
+        } else {
+            console.warn('⚠️ loginForm não encontrado');
         }
 
-        // Teacher Access
-        const teacherAccessBtn = document.getElementById('teacherAccessBtn');
-        if (teacherAccessBtn) {
-            teacherAccessBtn.addEventListener('click', () => {
-                this.showTeacherLogin();
+        // Teacher Button
+        const teacherBtn = document.getElementById('teacherBtn');
+        if (teacherBtn) {
+            teacherBtn.addEventListener('click', () => {
+                this.showScreen('teacherScreen');
             });
         }
 
-        // Teacher Password Form
-        const teacherPasswordForm = document.getElementById('teacherPasswordForm');
-        if (teacherPasswordForm) {
-            teacherPasswordForm.addEventListener('submit', (e) => {
+        // Teacher Form
+        const teacherForm = document.getElementById('teacherForm');
+        if (teacherForm) {
+            teacherForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 this.handleTeacherLogin();
             });
         }
 
         // Back to Login
-        const backToLoginBtn = document.getElementById('backToLoginBtn');
-        if (backToLoginBtn) {
-            backToLoginBtn.addEventListener('click', () => {
+        const backToLogin = document.getElementById('backToLogin');
+        if (backToLogin) {
+            backToLogin.addEventListener('click', () => {
                 this.showScreen('loginScreen');
             });
         }
 
-        // Logout
-        const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
-                this.handleLogout();
-            });
-        }
+        // Logout buttons
+        const logoutButtons = ['logoutBtn', 'logoutSim', 'logoutTeacher'];
+        logoutButtons.forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    this.handleLogout();
+                });
+            }
+        });
 
         // Create Team Form
         const createTeamForm = document.getElementById('createTeamForm');
@@ -546,370 +242,206 @@ const EmpresaTec = {
             });
         }
 
-        // Copy Team Code
-        const copyCodeBtn = document.getElementById('copyCodeBtn');
-        if (copyCodeBtn) {
-            copyCodeBtn.addEventListener('click', () => {
+        // Copy Button
+        const copyBtn = document.getElementById('copyBtn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
                 this.copyTeamCode();
             });
         }
 
-        // Start Act 1
-        const startAct1Btn = document.getElementById('startAct1Btn');
-        if (startAct1Btn) {
-            startAct1Btn.addEventListener('click', () => {
-                this.startAct1();
+        // Start Button
+        const startBtn = document.getElementById('startBtn');
+        if (startBtn) {
+            startBtn.addEventListener('click', () => {
+                this.startSimulation();
             });
         }
 
         // Questionnaire Navigation
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
-        const finishProfileBtn = document.getElementById('finishProfileBtn');
+        const finishBtn = document.getElementById('finishBtn');
+        const continueBtn = document.getElementById('continueBtn');
 
         if (prevBtn) {
-            prevBtn.addEventListener('click', () => {
-                this.prevQuestion();
-            });
+            prevBtn.addEventListener('click', () => this.prevQuestion());
         }
-
         if (nextBtn) {
-            nextBtn.addEventListener('click', () => {
-                this.nextQuestion();
-            });
+            nextBtn.addEventListener('click', () => this.nextQuestion());
         }
-
-        if (finishProfileBtn) {
-            finishProfileBtn.addEventListener('click', () => {
-                this.finishProfile();
-            });
+        if (finishBtn) {
+            finishBtn.addEventListener('click', () => this.finishQuestionnaire());
+        }
+        if (continueBtn) {
+            continueBtn.addEventListener('click', () => this.goToPhase(2));
         }
 
         // Phase Navigation
-        const continueButtons = [
-            'continueToPhase2', 'continueToPhase3', 'continueToPhase4', 'continueToPhase5'
-        ];
-
-        continueButtons.forEach(buttonId => {
-            const btn = document.getElementById(buttonId);
+        const phaseButtons = ['nextPhase2', 'nextPhase3', 'nextPhase4', 'finishAct'];
+        phaseButtons.forEach((id, index) => {
+            const btn = document.getElementById(id);
             if (btn) {
                 btn.addEventListener('click', () => {
-                    const phaseNumber = parseInt(buttonId.slice(-1));
-                    this.goToPhase(phaseNumber);
+                    if (id === 'finishAct') {
+                        this.finishAct1();
+                    } else {
+                        this.goToPhase(index + 3);
+                    }
                 });
             }
         });
 
-        // Voting Buttons
-        const submitSegmentVote = document.getElementById('submitSegmentVote');
-        if (submitSegmentVote) {
-            submitSegmentVote.addEventListener('click', () => {
-                this.submitSegmentVote();
+        // Teacher Dashboard
+        const exportBtn = document.getElementById('exportBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => this.exportData());
+        }
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => this.resetAllData());
+        }
+
+        // Alert Close
+        const alertClose = document.getElementById('alertClose');
+        if (alertClose) {
+            alertClose.addEventListener('click', () => {
+                this.hideAlert();
             });
         }
 
-        const submitCeoVote = document.getElementById('submitCeoVote');
-        if (submitCeoVote) {
-            submitCeoVote.addEventListener('click', () => {
-                this.submitCeoVote();
-            });
-        }
-
-        // Location and Equipment
-        const confirmLocation = document.getElementById('confirmLocation');
-        if (confirmLocation) {
-            confirmLocation.addEventListener('click', () => {
-                this.confirmLocation();
-            });
-        }
-
-        const finishAct1 = document.getElementById('finishAct1');
-        if (finishAct1) {
-            finishAct1.addEventListener('click', () => {
-                this.finishAct1();
-            });
-        }
-
-        // Teacher Controls
-        const teacherButtons = [
-            'approveAct1', 'approveAct2', 'approveAct3', 'approveAct4', 'approveAct5',
-            'showRanking', 'exportData', 'generateReport', 'resetAllData', 'backupData',
-            'backToSimulation', 'teacherLogout'
-        ];
-
-        teacherButtons.forEach(buttonId => {
-            const btn = document.getElementById(buttonId);
-            if (btn) {
-                btn.addEventListener('click', () => {
-                    this.handleTeacherAction(buttonId);
-                });
-            }
-        });
-
-        // Close Ranking
-        const closeRanking = document.getElementById('closeRanking');
-        if (closeRanking) {
-            closeRanking.addEventListener('click', () => {
-                this.closeRanking();
-            });
-        }
-
-        console.log('🔗 Event listeners configurados');
+        console.log('✅ Event listeners configurados');
     },
 
-    // ===== SISTEMA DE TELAS =====
+    // ===== NAVIGATION SYSTEM =====
     showScreen(screenId) {
         console.log(`📱 Mudando para tela: ${screenId}`);
 
-        // Esconder todas as telas
-        const screens = document.querySelectorAll('.screen');
-        screens.forEach(screen => {
-            screen.classList.remove('active');
-        });
+        try {
+            // Hide all screens
+            const screens = document.querySelectorAll('.screen');
+            screens.forEach(screen => {
+                screen.classList.remove('active');
+            });
 
-        // Mostrar tela solicitada
-        const targetScreen = document.getElementById(screenId);
-        if (targetScreen) {
-            targetScreen.classList.add('active');
-            this.state.currentScreen = screenId;
-        }
-
-        // Atualizar barras
-        this.updateBars();
-        this.saveState();
-    },
-
-    updateBars() {
-        const userBar = document.getElementById('userBar');
-        const progressBar = document.getElementById('progressBar');
-
-        // Mostrar/esconder barras baseado na tela atual
-        if (this.state.currentScreen === 'loginScreen' || this.state.currentScreen === 'teacherScreen') {
-            userBar?.classList.add('hidden');
-            progressBar?.classList.add('hidden');
-            document.querySelector('.main-container')?.classList.add('no-bars');
-        } else {
-            if (this.state.isAuthenticated) {
-                userBar?.classList.remove('hidden');
-                this.updateUserInfo();
-            }
-
-            if (this.state.currentScreen.startsWith('act')) {
-                progressBar?.classList.remove('hidden');
-                this.updateProgress();
+            // Show target screen
+            const targetScreen = document.getElementById(screenId);
+            if (targetScreen) {
+                targetScreen.classList.add('active');
+                this.state.currentScreen = screenId;
+                this.saveState();
             } else {
-                progressBar?.classList.add('hidden');
+                console.error(`❌ Tela ${screenId} não encontrada`);
             }
-
-            document.querySelector('.main-container')?.classList.remove('no-bars');
+        } catch (error) {
+            console.error('❌ Erro ao mudar tela:', error);
         }
     },
 
-    updateUserInfo() {
-        const currentUser = document.getElementById('currentUser');
-        const currentTeam = document.getElementById('currentTeam');
-        const currentScore = document.getElementById('currentScore');
-
-        if (currentUser && this.state.currentUser) {
-            const onlineIndicator = this.state.isOnline ? '🟢' : '🔴';
-            currentUser.textContent = `${onlineIndicator} ${this.state.currentUser.name}`;
-        }
-
-        if (currentTeam && this.state.currentTeam) {
-            currentTeam.textContent = `🏢 ${this.state.currentTeam.name}`;
-        }
-
-        if (currentScore) {
-            currentScore.textContent = `🏆 ${this.state.teamScore.toLocaleString()} pontos`;
-        }
-    },
-
-    updateProgress() {
-        const progressLabel = document.getElementById('progressLabel');
-        const progressPhase = document.getElementById('progressPhase');
-        const progressFill = document.getElementById('progressFill');
-
-        if (progressLabel) {
-            progressLabel.textContent = `EmpresaTec - Ato ${this.state.currentAct}`;
-        }
-
-        if (progressPhase) {
-            progressPhase.textContent = `Fase ${this.state.currentPhase} de 5`;
-        }
-
-        if (progressFill) {
-            const progress = ((this.state.currentPhase - 1) / 4) * 100;
-            progressFill.style.width = `${progress}%`;
-        }
-    },
-
-    // ===== AUTENTICAÇÃO - CORRIGIDA =====
-    async handleLogin() {
-        console.log('🔐 Iniciando processo de login...');
+    // ===== LOGIN SYSTEM ===== 
+    handleLogin() {
+        console.log('🔐 Processando login');
 
         const email = document.getElementById('loginEmail')?.value?.trim();
-        const password = document.getElementById('loginPassword')?.value;
+        const password = document.getElementById('loginPassword')?.value?.trim();
 
         if (!email || !password) {
-            this.showAlert('Por favor, preencha todos os campos.', 'error');
+            this.showAlert('Preencha todos os campos', 'error');
             return;
         }
 
         if (!this.isValidEmail(email)) {
-            this.showAlert('Por favor, digite um email válido.', 'error');
+            this.showAlert('Email inválido', 'error');
             return;
         }
 
         try {
             this.showLoading('Fazendo login...');
 
-            // CORREÇÃO: Definir currentUser SEMPRE
+            // Create user
             this.state.currentUser = {
-                uid: this.generateId(),
+                id: this.generateId(),
                 email: email,
                 name: email.split('@')[0]
             };
 
-            console.log('👤 Usuário definido:', this.state.currentUser);
-
-            // Tentar Firebase se disponível
-            if (window.firebase && this.state.isOnline) {
-                try {
-                    await window.firebase.signInWithEmailAndPassword(window.firebase.auth, email, password);
-                } catch (authError) {
-                    if (authError.code === 'auth/user-not-found') {
-                        await window.firebase.createUserWithEmailAndPassword(window.firebase.auth, email, password);
-                        this.showAlert('Conta criada automaticamente!', 'success');
-                    } else {
-                        console.warn('⚠️ Firebase erro:', authError.message);
-                    }
-                }
-            }
-
-            // SEMPRE definir como autenticado
-            this.state.isAuthenticated = true;
-
-            // Carregar dados do usuário
-            await this.loadUserData();
+            console.log('👤 Usuário criado:', this.state.currentUser);
 
             this.hideLoading();
             this.showAlert('Login realizado com sucesso!', 'success');
-
-            // Determinar próxima tela
-            if (this.state.currentTeam) {
-                this.showScreen('act1Screen');
-                this.loadAct1();
-            } else {
-                this.showScreen('teamScreen');
-            }
+            this.showScreen('teamScreen');
+            this.updateUserInfo();
 
         } catch (error) {
             this.hideLoading();
             console.error('❌ Erro no login:', error);
-            this.showAlert(`Erro no login: ${error.message}`, 'error');
+            this.showAlert('Erro no login: ' + error.message, 'error');
         }
-    },
-
-    async loadUserData() {
-        if (!this.state.currentUser) return;
-
-        try {
-            console.log('📂 Carregando dados do usuário:', this.state.currentUser.uid);
-
-            // Carregar dados do Firebase se disponível
-            if (window.firebase && this.state.isOnline && window.firebase.db) {
-                try {
-                    const userRef = window.firebase.doc(window.firebase.db, 'users', this.state.currentUser.uid);
-                    const userSnap = await window.firebase.getDoc(userRef);
-
-                    if (userSnap.exists()) {
-                        const userData = userSnap.data();
-                        if (userData.gameState) {
-                            Object.assign(this.state, userData.gameState);
-                            console.log('📥 Dados carregados do Firebase');
-                        }
-                    }
-                } catch (firebaseError) {
-                    console.warn('⚠️ Erro no Firebase (não crítico):', firebaseError.message);
-                }
-            }
-
-            console.log('✅ Dados do usuário carregados');
-        } catch (error) {
-            console.warn('⚠️ Não foi possível carregar dados do servidor:', error.message);
-        }
-    },
-
-    showTeacherLogin() {
-        this.showScreen('teacherScreen');
     },
 
     handleTeacherLogin() {
-        const password = document.getElementById('teacherPassword')?.value;
+        console.log('👩‍🏫 Login do professor');
+
+        const password = document.getElementById('teacherPassword')?.value?.trim();
 
         if (!password) {
-            this.showAlert('Digite a senha do professor.', 'error');
+            this.showAlert('Digite a senha', 'error');
             return;
         }
 
         if (password !== this.state.teacherPassword) {
             this.showAlert('Senha incorreta!', 'error');
-            document.getElementById('teacherPassword').value = '';
-            return;
-        }
-
-        this.state.isTeacher = true;
-        this.state.isAuthenticated = true;
-
-        // Definir currentUser para professor
-        if (!this.state.currentUser) {
-            this.state.currentUser = {
-                uid: 'professor',
-                email: 'professor@empresatec.edu',
-                name: 'Professor'
-            };
-        }
-
-        // Esconder login e mostrar dashboard
-        const teacherLogin = document.getElementById('teacherLogin');
-        const teacherDashboard = document.getElementById('teacherDashboard');
-
-        if (teacherLogin) teacherLogin.classList.add('hidden');
-        if (teacherDashboard) teacherDashboard.classList.remove('hidden');
-
-        this.loadTeacherDashboard();
-        this.showAlert('Bem-vindo ao painel administrativo!', 'success');
-    },
-
-    handleLogout() {
-        if (!confirm('Deseja realmente fazer logout?')) {
             return;
         }
 
         try {
-            // Logout Firebase se disponível
-            if (window.firebase && window.firebase.auth) {
-                window.firebase.signOut(window.firebase.auth);
-            }
+            // Show teacher dashboard
+            const teacherLogin = document.querySelector('.teacher-login');
+            const teacherDashboard = document.getElementById('teacherDashboard');
 
-            // Parar sincronização
-            if (this.state.syncInterval) {
-                clearInterval(this.state.syncInterval);
-                this.state.syncInterval = null;
-            }
+            if (teacherLogin) teacherLogin.style.display = 'none';
+            if (teacherDashboard) teacherDashboard.classList.remove('hidden');
 
-            // Reset estado local
+            this.loadTeacherDashboard();
+            this.showAlert('Bem-vindo ao painel administrativo!', 'success');
+
+        } catch (error) {
+            console.error('❌ Erro no login do professor:', error);
+            this.showAlert('Erro no login: ' + error.message, 'error');
+        }
+    },
+
+    handleLogout() {
+        if (!confirm('Deseja realmente sair?')) {
+            return;
+        }
+
+        try {
+            // Reset state
             this.state = {
-                ...this.state,
                 currentUser: null,
                 currentTeam: null,
-                isTeacher: false,
-                isAuthenticated: false,
-                currentScreen: 'loginScreen'
+                currentScreen: 'loginScreen',
+                currentPhase: 1,
+                currentQuestion: 0,
+                userAnswers: [],
+                userProfile: null,
+                teacherPassword: 'professor2025'
             };
 
-            // Limpar localStorage
+            // Clear storage
             localStorage.removeItem('empresatec_state');
+
+            // Reset forms
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => form.reset());
+
+            // Hide teacher dashboard
+            const teacherDashboard = document.getElementById('teacherDashboard');
+            const teacherLogin = document.querySelector('.teacher-login');
+            if (teacherDashboard) teacherDashboard.classList.add('hidden');
+            if (teacherLogin) teacherLogin.style.display = 'block';
 
             this.showScreen('loginScreen');
             this.showAlert('Logout realizado com sucesso!', 'success');
@@ -920,68 +452,53 @@ const EmpresaTec = {
         }
     },
 
-    // ===== GESTÃO DE EQUIPES - COM SINCRONIZAÇÃO =====
-    async createTeam() {
-        console.log('🏗️ Iniciando criação de equipe...');
+    // ===== TEAM MANAGEMENT =====
+    createTeam() {
+        console.log('🏗️ Criando equipe');
 
         if (!this.state.currentUser) {
-            console.error('❌ currentUser é null!');
-            this.showAlert('Erro: usuário não autenticado. Faça login novamente.', 'error');
-            this.showScreen('loginScreen');
+            this.showAlert('Erro: usuário não autenticado', 'error');
             return;
         }
 
         const companyName = document.getElementById('companyName')?.value?.trim();
 
         if (!companyName) {
-            this.showAlert('Digite o nome da empresa.', 'error');
+            this.showAlert('Digite o nome da empresa', 'error');
             return;
         }
 
         if (companyName.length < 3) {
-            this.showAlert('O nome deve ter pelo menos 3 caracteres.', 'error');
+            this.showAlert('Nome deve ter pelo menos 3 caracteres', 'error');
             return;
         }
 
         try {
-            this.showLoading('Criando empresa e sincronizando...');
+            this.showLoading('Criando empresa...');
 
             const teamCode = this.generateTeamCode();
-
             const newTeam = {
                 id: teamCode,
                 name: companyName,
                 code: teamCode,
-                leader: this.state.currentUser.uid,
+                leader: this.state.currentUser.id,
                 members: [{
-                    uid: this.state.currentUser.uid,
-                    email: this.state.currentUser.email,
+                    id: this.state.currentUser.id,
                     name: this.state.currentUser.name,
+                    email: this.state.currentUser.email,
                     isLeader: true,
-                    joinedAt: new Date().toISOString(),
-                    profile: null
+                    joinedAt: new Date().toISOString()
                 }],
                 createdAt: new Date().toISOString(),
-                lastUpdated: new Date().toISOString(),
-                status: 'forming',
-                currentAct: 1,
-                currentPhase: 1,
-                score: 0,
-                decisions: {},
-                updatedBy: this.state.currentUser.uid
+                status: 'active'
             };
 
-            // CORREÇÃO: Salvar com sincronização
-            const savedTeam = await this.sync.syncData('saveTeam', newTeam);
-            this.state.currentTeam = savedTeam;
+            // Save team
+            this.saveTeam(newTeam);
+            this.state.currentTeam = newTeam;
 
             this.hideLoading();
-
-            const statusMsg = this.state.isOnline ? 
-                `Empresa "${companyName}" criada e sincronizada! Código: ${teamCode}` :
-                `Empresa "${companyName}" criada localmente! Código: ${teamCode}`;
-
-            this.showAlert(statusMsg, 'success');
+            this.showAlert(`Empresa "${companyName}" criada! Código: ${teamCode}`, 'success');
             this.showTeamStatus();
 
             console.log('✅ Equipe criada:', newTeam);
@@ -993,54 +510,40 @@ const EmpresaTec = {
         }
     },
 
-    async joinTeam() {
-        console.log('🤝 Iniciando entrada em equipe...');
+    joinTeam() {
+        console.log('🤝 Entrando em equipe');
 
         if (!this.state.currentUser) {
-            console.error('❌ currentUser é null!');
-            this.showAlert('Erro: usuário não autenticado. Faça login novamente.', 'error');
-            this.showScreen('loginScreen');
+            this.showAlert('Erro: usuário não autenticado', 'error');
             return;
         }
 
         const teamCode = document.getElementById('teamCode')?.value?.trim()?.toUpperCase();
 
         if (!teamCode) {
-            this.showAlert('Digite o código da empresa.', 'error');
+            this.showAlert('Digite o código da empresa', 'error');
             return;
         }
 
         if (teamCode.length !== 6) {
-            this.showAlert('Código deve ter 6 caracteres.', 'error');
+            this.showAlert('Código deve ter 6 caracteres', 'error');
             return;
         }
 
         try {
             this.showLoading('Buscando empresa...');
 
-            console.log('🔍 Buscando equipe com código:', teamCode);
-
-            // CORREÇÃO: Buscar com sincronização
-            const team = await this.sync.syncData('getTeam', { code: teamCode });
+            const team = this.findTeam(teamCode);
 
             if (!team) {
                 this.hideLoading();
-                const errorMsg = this.state.isOnline ? 
-                    `Empresa ${teamCode} não encontrada online. Verifique o código.` :
-                    `Empresa ${teamCode} não encontrada localmente.`;
-                console.log('❌ Equipe não encontrada:', {
-                    codigo: teamCode,
-                    online: this.state.isOnline
-                });
-                this.showAlert(errorMsg, 'error');
+                this.showAlert('Empresa não encontrada', 'error');
                 return;
             }
 
-            console.log('✅ Equipe encontrada:', team.name);
-
-            // Verificar se já é membro
-            const existingMember = team.members.find(m => m.uid === this.state.currentUser.uid);
-            if (existingMember) {
+            // Check if already member
+            const isMember = team.members.some(m => m.id === this.state.currentUser.id);
+            if (isMember) {
                 this.hideLoading();
                 this.state.currentTeam = team;
                 this.showAlert('Você já faz parte desta empresa!', 'info');
@@ -1048,30 +551,25 @@ const EmpresaTec = {
                 return;
             }
 
-            // Verificar limite de membros
+            // Check member limit
             if (team.members.length >= 6) {
                 this.hideLoading();
-                this.showAlert('Empresa já atingiu o limite de 6 membros.', 'error');
+                this.showAlert('Empresa já tem o máximo de 6 membros', 'error');
                 return;
             }
 
-            // Adicionar membro
+            // Add member
             const newMember = {
-                uid: this.state.currentUser.uid,
-                email: this.state.currentUser.email,
+                id: this.state.currentUser.id,
                 name: this.state.currentUser.name,
+                email: this.state.currentUser.email,
                 isLeader: false,
-                joinedAt: new Date().toISOString(),
-                profile: null
+                joinedAt: new Date().toISOString()
             };
 
             team.members.push(newMember);
-            team.lastUpdated = new Date().toISOString();
-            team.updatedBy = this.state.currentUser.uid;
-
-            // CORREÇÃO: Salvar com sincronização
-            const updatedTeam = await this.sync.syncData('saveTeam', team);
-            this.state.currentTeam = updatedTeam;
+            this.saveTeam(team);
+            this.state.currentTeam = team;
 
             this.hideLoading();
             this.showAlert(`Bem-vindo à ${team.name}!`, 'success');
@@ -1084,284 +582,323 @@ const EmpresaTec = {
         }
     },
 
-    // CORREÇÃO: Status da equipe com indicador online
     showTeamStatus() {
+        console.log('📊 Mostrando status da equipe');
+
         const teamStatus = document.getElementById('teamStatus');
         const teamName = document.getElementById('teamName');
         const teamCodeDisplay = document.getElementById('teamCodeDisplay');
         const membersList = document.getElementById('membersList');
-        const teamWaiting = document.getElementById('teamWaiting');
-        const startGameSection = document.getElementById('startGameSection');
+        const startSection = document.getElementById('startSection');
 
-        if (!this.state.currentTeam) return;
-
-        // Mostrar seção de status
-        if (teamStatus) teamStatus.classList.remove('hidden');
-
-        // Nome da equipe com indicador online
-        if (teamName) {
-            const onlineIndicator = this.state.isOnline ? '🟢' : '🔴';
-            const statusText = this.state.isOnline ? 'Online' : 'Offline';
-            teamName.innerHTML = `${this.state.currentTeam.name} <small>${onlineIndicator} ${statusText}</small>`;
+        if (!this.state.currentTeam) {
+            console.warn('⚠️ Nenhuma equipe para mostrar');
+            return;
         }
 
-        // Código da equipe
-        if (teamCodeDisplay) teamCodeDisplay.textContent = this.state.currentTeam.code;
+        try {
+            // Show team status
+            if (teamStatus) teamStatus.classList.remove('hidden');
 
-        // Lista de membros
-        if (membersList) {
-            membersList.innerHTML = '';
-            this.state.currentTeam.members.forEach(member => {
-                const memberCard = document.createElement('div');
-                memberCard.className = `member-card ${member.isLeader ? 'leader' : ''}`;
-                memberCard.innerHTML = `
-                    <div class="member-name">${member.name} ${member.isLeader ? '👑' : ''}</div>
-                    <div class="member-role">${member.isLeader ? 'CEO Fundador' : 'Executivo'}</div>
-                `;
-                membersList.appendChild(memberCard);
-            });
-        }
+            // Team name
+            if (teamName) teamName.textContent = this.state.currentTeam.name;
 
-        // Status de espera
-        const memberCount = this.state.currentTeam.members.length;
-        if (teamWaiting) {
-            if (memberCount < 3) {
-                teamWaiting.classList.remove('hidden');
-                const syncStatus = this.state.isOnline ? 
-                    'Aguardando mais membros entrarem online...' : 
-                    'Aguardando mais membros (modo offline)...';
-                teamWaiting.querySelector('p').textContent = `⏳ ${syncStatus} (${memberCount}/3 mínimo)`;
-            } else {
-                teamWaiting.classList.add('hidden');
+            // Team code
+            if (teamCodeDisplay) teamCodeDisplay.textContent = this.state.currentTeam.code;
+
+            // Members list
+            if (membersList) {
+                membersList.innerHTML = '';
+                this.state.currentTeam.members.forEach(member => {
+                    const memberDiv = document.createElement('div');
+                    memberDiv.className = `member ${member.isLeader ? 'leader' : ''}`;
+                    memberDiv.innerHTML = `
+                        <span class="member-name">${member.name} ${member.isLeader ? '👑' : ''}</span>
+                        <span class="member-role">${member.isLeader ? 'Líder' : 'Membro'}</span>
+                    `;
+                    membersList.appendChild(memberDiv);
+                });
             }
-        }
 
-        // Botão de iniciar
-        if (startGameSection && this.state.currentUser && memberCount >= 3) {
-            const isLeader = this.state.currentTeam.leader === this.state.currentUser.uid;
-            if (isLeader) {
-                startGameSection.classList.remove('hidden');
+            // Start button (only for leader with min 2 members)
+            if (startSection) {
+                const isLeader = this.state.currentTeam.leader === this.state.currentUser.id;
+                const hasMinMembers = this.state.currentTeam.members.length >= 2;
+
+                if (isLeader && hasMinMembers) {
+                    startSection.classList.remove('hidden');
+                } else {
+                    startSection.classList.add('hidden');
+                }
             }
+
+        } catch (error) {
+            console.error('❌ Erro ao mostrar status da equipe:', error);
         }
     },
 
     copyTeamCode() {
-        const teamCode = this.state.currentTeam?.code;
-        if (!teamCode) return;
+        const code = this.state.currentTeam?.code;
+        if (!code) return;
 
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(teamCode).then(() => {
+        try {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(code).then(() => {
+                    this.showAlert('Código copiado!', 'success');
+                });
+            } else {
+                // Fallback
+                const textArea = document.createElement('textarea');
+                textArea.value = code;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
                 this.showAlert('Código copiado!', 'success');
-            }).catch(() => {
-                this.fallbackCopyCode(teamCode);
-            });
-        } else {
-            this.fallbackCopyCode(teamCode);
+            }
+        } catch (error) {
+            console.error('❌ Erro ao copiar código:', error);
+            this.showAlert('Erro ao copiar código', 'error');
         }
     },
 
-    fallbackCopyCode(code) {
-        const textArea = document.createElement('textarea');
-        textArea.value = code;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        this.showAlert('Código copiado!', 'success');
-    },
+    // ===== SIMULATION SYSTEM =====
+    startSimulation() {
+        console.log('🎮 Iniciando simulação');
 
-    // ===== ATO 1: FUNDAÇÃO DA EMPRESA =====
-    startAct1() {
-        console.log('🏗️ Iniciando Ato 1: Fundação da Empresa');
+        if (!this.state.currentTeam) {
+            this.showAlert('Erro: nenhuma equipe selecionada', 'error');
+            return;
+        }
 
-        this.state.currentAct = 1;
-        this.state.currentPhase = 1;
-        this.showScreen('act1Screen');
-        this.goToPhase(1);
+        try {
+            this.showScreen('simulationScreen');
+            this.updateSimulationInfo();
+            this.goToPhase(1);
+            this.loadQuestionnaire();
 
-        this.loadQuestionnaire();
+        } catch (error) {
+            console.error('❌ Erro ao iniciar simulação:', error);
+            this.showAlert('Erro ao iniciar simulação: ' + error.message, 'error');
+        }
     },
 
     goToPhase(phaseNumber) {
-        console.log(`📋 Indo para Fase ${phaseNumber}`);
+        console.log(`📋 Indo para fase ${phaseNumber}`);
 
-        this.state.currentPhase = phaseNumber;
+        try {
+            this.state.currentPhase = phaseNumber;
 
-        // Esconder todos os containers de fase
-        const phaseContainers = document.querySelectorAll('.phase-container');
-        phaseContainers.forEach(container => {
-            container.classList.remove('active');
-        });
+            // Hide all phases
+            const phases = document.querySelectorAll('.phase-container');
+            phases.forEach(phase => {
+                phase.classList.remove('active');
+            });
 
-        // Mostrar container da fase atual
-        const currentPhaseContainer = document.getElementById(`phase${phaseNumber}Container`);
-        if (currentPhaseContainer) {
-            currentPhaseContainer.classList.add('active');
-        }
+            // Show current phase
+            const currentPhase = document.getElementById(`phase${phaseNumber}`);
+            if (currentPhase) {
+                currentPhase.classList.add('active');
+            }
 
-        // Atualizar informações da fase
-        const currentPhaseElement = document.getElementById('act1CurrentPhase');
-        if (currentPhaseElement) {
-            currentPhaseElement.textContent = `${phaseNumber} de 5`;
-        }
+            // Update progress
+            this.updateProgress();
 
-        // Carregar conteúdo específico da fase
-        switch (phaseNumber) {
-            case 1:
+            // Load phase content
+            if (phaseNumber === 1) {
                 this.loadQuestionnaire();
-                break;
-            case 2:
-                this.loadSegmentSelection();
-                break;
-            case 3:
-                this.loadCeoElection();
-                break;
-            case 4:
-                this.loadLocationSelection();
-                break;
-            case 5:
-                this.loadEquipmentSelection();
-                break;
-        }
+            }
 
-        this.updateProgress();
-        this.saveState();
+        } catch (error) {
+            console.error('❌ Erro ao mudar fase:', error);
+        }
     },
 
-    // ===== FASE 1: QUESTIONÁRIO DE PERFIL =====
+    updateProgress() {
+        const currentPhaseEl = document.getElementById('currentPhase');
+        const progressFill = document.getElementById('progressFill');
+
+        if (currentPhaseEl) {
+            currentPhaseEl.textContent = this.state.currentPhase;
+        }
+
+        if (progressFill) {
+            const progress = ((this.state.currentPhase - 1) / 4) * 100;
+            progressFill.style.width = `${progress}%`;
+        }
+    },
+
+    updateSimulationInfo() {
+        const simUserName = document.getElementById('simUserName');
+        const simTeamName = document.getElementById('simTeamName');
+
+        if (simUserName && this.state.currentUser) {
+            simUserName.textContent = `👤 ${this.state.currentUser.name}`;
+        }
+
+        if (simTeamName && this.state.currentTeam) {
+            simTeamName.textContent = `🏢 ${this.state.currentTeam.name}`;
+        }
+    },
+
+    updateUserInfo() {
+        const currentUserName = document.getElementById('currentUserName');
+
+        if (currentUserName && this.state.currentUser) {
+            currentUserName.textContent = `👤 ${this.state.currentUser.name}`;
+        }
+    },
+    // ===== QUESTIONNAIRE SYSTEM =====
     loadQuestionnaire() {
-        console.log('🧠 Carregando questionário de perfil');
+        console.log('🧠 Carregando questionário');
 
-        if (!this.state.userAnswers) {
-            this.state.userAnswers = [];
+        try {
             this.state.currentQuestion = 0;
-        }
+            this.state.userAnswers = [];
+            this.displayQuestion();
+            this.updateQuestionProgress();
 
-        this.displayCurrentQuestion();
-        this.updateQuestionProgress();
+        } catch (error) {
+            console.error('❌ Erro ao carregar questionário:', error);
+        }
     },
 
-    displayCurrentQuestion() {
-        const question = this.data.questions[this.state.currentQuestion];
+    displayQuestion() {
+        const question = this.questionData[this.state.currentQuestion];
         if (!question) return;
 
-        const questionText = document.getElementById('questionText');
-        const questionOptions = document.getElementById('questionOptions');
+        try {
+            const questionText = document.getElementById('questionText');
+            const questionOptions = document.getElementById('questionOptions');
 
-        if (questionText) {
-            questionText.textContent = question.text;
-        }
+            if (questionText) {
+                questionText.textContent = question.text;
+            }
 
-        if (questionOptions) {
-            questionOptions.innerHTML = '';
+            if (questionOptions) {
+                questionOptions.innerHTML = '';
 
-            question.options.forEach((option, index) => {
-                const optionButton = document.createElement('button');
-                optionButton.className = 'question-option';
-                optionButton.textContent = option.text;
-                optionButton.dataset.optionIndex = index;
+                question.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.className = 'question-option';
+                    button.textContent = option.text;
+                    button.dataset.index = index;
 
-                // Marcar se já foi selecionada
-                const currentAnswer = this.state.userAnswers[this.state.currentQuestion];
-                if (currentAnswer && currentAnswer.optionIndex === index) {
-                    optionButton.classList.add('selected');
-                }
+                    // Check if already answered
+                    const currentAnswer = this.state.userAnswers[this.state.currentQuestion];
+                    if (currentAnswer && currentAnswer.optionIndex === index) {
+                        button.classList.add('selected');
+                    }
 
-                optionButton.addEventListener('click', () => {
-                    this.selectQuestionOption(index);
+                    button.addEventListener('click', () => {
+                        this.selectOption(index);
+                    });
+
+                    questionOptions.appendChild(button);
                 });
+            }
 
-                questionOptions.appendChild(optionButton);
-            });
+            this.updateQuestionNavigation();
+
+        } catch (error) {
+            console.error('❌ Erro ao exibir pergunta:', error);
         }
-
-        this.updateQuestionNavigation();
     },
 
-    selectQuestionOption(optionIndex) {
-        const question = this.data.questions[this.state.currentQuestion];
-        const option = question.options[optionIndex];
+    selectOption(optionIndex) {
+        console.log(`Selecionada opção ${optionIndex}`);
 
-        // Salvar resposta
-        this.state.userAnswers[this.state.currentQuestion] = {
-            questionId: question.id,
-            optionIndex: optionIndex,
-            option: option
-        };
+        try {
+            const question = this.questionData[this.state.currentQuestion];
+            const option = question.options[optionIndex];
 
-        // Atualizar visualização
-        const questionOptions = document.querySelectorAll('.question-option');
-        questionOptions.forEach(btn => btn.classList.remove('selected'));
+            // Save answer
+            this.state.userAnswers[this.state.currentQuestion] = {
+                questionId: question.id,
+                optionIndex: optionIndex,
+                option: option
+            };
 
-        const selectedButton = document.querySelector(`[data-option-index="${optionIndex}"]`);
-        if (selectedButton) {
-            selectedButton.classList.add('selected');
-        }
+            // Update UI
+            const buttons = document.querySelectorAll('.question-option');
+            buttons.forEach(btn => btn.classList.remove('selected'));
 
-        this.updateQuestionNavigation();
-        this.saveState();
+            const selectedButton = document.querySelector(`[data-index="${optionIndex}"]`);
+            if (selectedButton) {
+                selectedButton.classList.add('selected');
+            }
 
-        // Auto-avançar se não for a última pergunta
-        if (this.state.currentQuestion < this.data.questions.length - 1) {
-            setTimeout(() => {
-                this.nextQuestion();
-            }, 800);
+            this.updateQuestionNavigation();
+            this.saveState();
+
+            // Auto advance if not last question
+            if (this.state.currentQuestion < this.questionData.length - 1) {
+                setTimeout(() => {
+                    this.nextQuestion();
+                }, 800);
+            }
+
+        } catch (error) {
+            console.error('❌ Erro ao selecionar opção:', error);
         }
     },
 
     updateQuestionProgress() {
         const currentQ = document.getElementById('currentQ');
         const totalQ = document.getElementById('totalQ');
-        const progressMini = document.getElementById('progressMini');
+        const miniProgressFill = document.getElementById('miniProgressFill');
 
-        if (currentQ) currentQ.textContent = this.state.currentQuestion + 1;
-        if (totalQ) totalQ.textContent = this.data.questions.length;
+        if (currentQ) {
+            currentQ.textContent = this.state.currentQuestion + 1;
+        }
 
-        if (progressMini) {
-            const progress = ((this.state.currentQuestion + 1) / this.data.questions.length) * 100;
-            progressMini.style.width = `${progress}%`;
+        if (totalQ) {
+            totalQ.textContent = this.questionData.length;
+        }
+
+        if (miniProgressFill) {
+            const progress = ((this.state.currentQuestion + 1) / this.questionData.length) * 100;
+            miniProgressFill.style.width = `${progress}%`;
         }
     },
 
     updateQuestionNavigation() {
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
-        const finishBtn = document.getElementById('finishProfileBtn');
+        const finishBtn = document.getElementById('finishBtn');
 
-        // Botão anterior
+        // Previous button
         if (prevBtn) {
             prevBtn.disabled = this.state.currentQuestion === 0;
         }
 
-        // Verificar se pergunta atual foi respondida
-        const currentAnswered = this.state.userAnswers[this.state.currentQuestion];
+        // Check if current question is answered
+        const isAnswered = this.state.userAnswers[this.state.currentQuestion];
 
-        // Botão próxima
+        // Next button
         if (nextBtn) {
-            nextBtn.disabled = !currentAnswered;
+            nextBtn.disabled = !isAnswered;
         }
 
-        // Verificar se todas as perguntas foram respondidas
-        const answeredCount = this.state.userAnswers.filter(a => a).length;
-        const allAnswered = answeredCount === this.data.questions.length;
-
-        // Botão finalizar
+        // Finish button (show only on last question if all answered)
         if (finishBtn) {
-            if (allAnswered) {
+            const allAnswered = this.state.userAnswers.filter(a => a).length === this.questionData.length;
+            const isLastQuestion = this.state.currentQuestion === this.questionData.length - 1;
+
+            if (isLastQuestion && allAnswered) {
                 finishBtn.classList.remove('hidden');
                 if (nextBtn) nextBtn.classList.add('hidden');
             } else {
                 finishBtn.classList.add('hidden');
                 if (nextBtn) nextBtn.classList.remove('hidden');
             }
-            finishBtn.disabled = !allAnswered;
         }
     },
 
     nextQuestion() {
-        if (this.state.currentQuestion < this.data.questions.length - 1) {
+        if (this.state.currentQuestion < this.questionData.length - 1) {
             this.state.currentQuestion++;
-            this.displayCurrentQuestion();
+            this.displayQuestion();
             this.updateQuestionProgress();
         }
     },
@@ -1369,19 +906,22 @@ const EmpresaTec = {
     prevQuestion() {
         if (this.state.currentQuestion > 0) {
             this.state.currentQuestion--;
-            this.displayCurrentQuestion();
+            this.displayQuestion();
             this.updateQuestionProgress();
         }
     },
 
-    finishProfile() {
-        const answeredCount = this.state.userAnswers.filter(a => a).length;
-        if (answeredCount < this.data.questions.length) {
-            this.showAlert('Responda todas as perguntas primeiro.', 'error');
-            return;
-        }
+    finishQuestionnaire() {
+        console.log('🎯 Finalizando questionário');
 
         try {
+            const allAnswered = this.state.userAnswers.filter(a => a).length === this.questionData.length;
+
+            if (!allAnswered) {
+                this.showAlert('Responda todas as perguntas primeiro', 'error');
+                return;
+            }
+
             this.showLoading('Analisando perfil...');
 
             const profile = this.calculateProfile();
@@ -1389,27 +929,12 @@ const EmpresaTec = {
 
             this.displayProfileResult(profile);
 
-            // Atualizar perfil do membro na equipe
-            if (this.state.currentTeam && this.state.currentUser) {
-                const member = this.state.currentTeam.members.find(m => m.uid === this.state.currentUser.uid);
-                if (member) {
-                    member.profile = profile;
-                    // Salvar com sincronização
-                    this.sync.syncData('saveTeam', this.state.currentTeam);
-                }
-            }
-
             this.hideLoading();
             this.showAlert(`Seu perfil: ${profile.name}!`, 'success');
 
-            // Verificar se todos os membros completaram o perfil
-            setTimeout(() => {
-                this.checkAllProfilesComplete();
-            }, 2000);
-
         } catch (error) {
             this.hideLoading();
-            console.error('❌ Erro ao finalizar perfil:', error);
+            console.error('❌ Erro ao finalizar questionário:', error);
             this.showAlert('Erro ao processar perfil: ' + error.message, 'error');
         }
     },
@@ -1423,72 +948,462 @@ const EmpresaTec = {
             communicator: 0
         };
 
-        // Calcular pontuações baseadas nas respostas
+        // Count profile occurrences
         this.state.userAnswers.forEach(answer => {
-            if (answer && answer.option) {
-                const profile = answer.option.profile;
-                const weight = answer.option.weight || 1;
-                scores[profile] += weight;
+            if (answer && answer.option && answer.option.profile) {
+                scores[answer.option.profile]++;
             }
         });
 
-        // Encontrar perfil dominante
+        // Find dominant profile
         const dominantProfile = Object.keys(scores).reduce((a, b) => 
             scores[a] > scores[b] ? a : b
         );
 
         return {
             type: dominantProfile,
-            ...this.data.profiles[dominantProfile],
-            scores: scores,
-            calculatedAt: new Date().toISOString()
+            ...this.profiles[dominantProfile],
+            scores: scores
         };
     },
 
     displayProfileResult(profile) {
-        const profileResult = document.getElementById('profileResult');
-        const profileIcon = document.getElementById('profileIcon');
-        const profileName = document.getElementById('profileName');
-        const profileDescription = document.getElementById('profileDescription');
-        const profileStrengths = document.getElementById('profileStrengths');
+        try {
+            const profileResult = document.getElementById('profileResult');
+            const profileIcon = document.getElementById('profileIcon');
+            const profileName = document.getElementById('profileName');
+            const profileDesc = document.getElementById('profileDesc');
+            const profileStrengths = document.getElementById('profileStrengths');
 
-        if (profileResult) profileResult.classList.remove('hidden');
-        if (profileIcon) profileIcon.textContent = profile.icon;
-        if (profileName) profileName.textContent = profile.name;
-        if (profileDescription) profileDescription.textContent = profile.description;
+            if (profileResult) profileResult.classList.remove('hidden');
+            if (profileIcon) profileIcon.textContent = profile.icon;
+            if (profileName) profileName.textContent = profile.name;
+            if (profileDesc) profileDesc.textContent = profile.description;
 
-        if (profileStrengths) {
-            profileStrengths.innerHTML = '';
-            profile.strengths.forEach(strength => {
-                const strengthTag = document.createElement('span');
-                strengthTag.className = 'strength-tag';
-                strengthTag.textContent = strength;
-                profileStrengths.appendChild(strengthTag);
+            if (profileStrengths) {
+                profileStrengths.innerHTML = '';
+
+                // Add some example strengths based on profile
+                const strengths = this.getProfileStrengths(profile.type);
+                strengths.forEach(strength => {
+                    const span = document.createElement('span');
+                    span.className = 'strength-tag';
+                    span.textContent = strength;
+                    profileStrengths.appendChild(span);
+                });
+            }
+
+        } catch (error) {
+            console.error('❌ Erro ao exibir resultado do perfil:', error);
+        }
+    },
+
+    getProfileStrengths(profileType) {
+        const strengthsMap = {
+            strategist: ['Planejamento', 'Liderança', 'Visão de Futuro', 'Análise'],
+            innovator: ['Criatividade', 'Tecnologia', 'Inovação', 'Desenvolvimento'],
+            executor: ['Execução', 'Eficiência', 'Implementação', 'Resultados'],
+            analyst: ['Análise', 'Dados', 'Métricas', 'Finanças'],
+            communicator: ['Comunicação', 'Relacionamento', 'Marketing', 'Networking']
+        };
+
+        return strengthsMap[profileType] || ['Habilidades Gerais'];
+    },
+
+    finishAct1() {
+        console.log('🎉 Finalizando Ato 1');
+
+        try {
+            this.showAlert('Ato 1 concluído com sucesso!', 'success');
+
+            // Here you would normally save the completion status
+            if (this.state.currentTeam) {
+                this.state.currentTeam.act1Completed = true;
+                this.saveTeam(this.state.currentTeam);
+            }
+
+            // For now, just return to team screen
+            setTimeout(() => {
+                this.showScreen('teamScreen');
+            }, 2000);
+
+        } catch (error) {
+            console.error('❌ Erro ao finalizar Ato 1:', error);
+            this.showAlert('Erro ao finalizar Ato 1: ' + error.message, 'error');
+        }
+    },
+
+    // ===== TEACHER DASHBOARD =====
+    loadTeacherDashboard() {
+        console.log('👩‍🏫 Carregando dashboard do professor');
+
+        try {
+            this.updateTeacherStats();
+            this.loadTeamsList();
+
+        } catch (error) {
+            console.error('❌ Erro ao carregar dashboard:', error);
+        }
+    },
+
+    updateTeacherStats() {
+        const totalTeams = document.getElementById('totalTeams');
+        const totalStudents = document.getElementById('totalStudents');
+
+        const teams = this.getAllTeams();
+        const teamCount = teams.length;
+        const studentCount = teams.reduce((sum, team) => sum + team.members.length, 0);
+
+        if (totalTeams) totalTeams.textContent = teamCount;
+        if (totalStudents) totalStudents.textContent = studentCount;
+    },
+
+    loadTeamsList() {
+        const teamsList = document.getElementById('teamsList');
+        if (!teamsList) return;
+
+        const teams = this.getAllTeams();
+
+        if (teams.length === 0) {
+            teamsList.innerHTML = '<div class="no-teams">📝 Nenhuma equipe criada ainda</div>';
+            return;
+        }
+
+        teamsList.innerHTML = '';
+
+        teams.forEach(team => {
+            const teamDiv = document.createElement('div');
+            teamDiv.className = 'team-item';
+            teamDiv.innerHTML = `
+                <div class="team-header">
+                    <h4>${team.name}</h4>
+                    <span class="team-code">Código: ${team.code}</span>
+                </div>
+                <div class="team-info">
+                    <span>👥 ${team.members.length} membros</span>
+                    <span>📅 ${this.formatDate(team.createdAt)}</span>
+                </div>
+                <div class="team-actions">
+                    <button class="btn btn--xs btn--outline" onclick="EmpresaTec.viewTeam('${team.code}')">
+                        👁️ Ver
+                    </button>
+                    <button class="btn btn--xs btn--danger" onclick="EmpresaTec.deleteTeam('${team.code}')">
+                        🗑️ Excluir
+                    </button>
+                </div>
+            `;
+            teamsList.appendChild(teamDiv);
+        });
+    },
+
+    viewTeam(teamCode) {
+        const team = this.findTeam(teamCode);
+        if (!team) {
+            this.showAlert('Equipe não encontrada', 'error');
+            return;
+        }
+
+        const membersList = team.members.map(m => 
+            `• ${m.name} ${m.isLeader ? '(Líder)' : ''}`
+        ).join('\n');
+
+        const info = `🏢 Empresa: ${team.name}
+🎯 Código: ${team.code}
+👥 Membros: ${team.members.length}
+📅 Criada: ${this.formatDate(team.createdAt)}
+
+Membros:
+${membersList}`;
+
+        alert(info);
+    },
+
+    deleteTeam(teamCode) {
+        if (!confirm(`Excluir a empresa ${teamCode}? Esta ação não pode ser desfeita.`)) {
+            return;
+        }
+
+        try {
+            const teams = this.getAllTeams();
+            const updatedTeams = teams.filter(team => team.code !== teamCode);
+            localStorage.setItem('empresatec_teams', JSON.stringify(updatedTeams));
+
+            this.loadTeamsList();
+            this.updateTeacherStats();
+            this.showAlert(`Empresa ${teamCode} excluída com sucesso!`, 'success');
+
+        } catch (error) {
+            console.error('❌ Erro ao excluir equipe:', error);
+            this.showAlert('Erro ao excluir equipe: ' + error.message, 'error');
+        }
+    },
+
+    exportData() {
+        try {
+            const teams = this.getAllTeams();
+            const data = {
+                timestamp: new Date().toISOString(),
+                teams: teams,
+                totalTeams: teams.length,
+                totalStudents: teams.reduce((sum, team) => sum + team.members.length, 0)
+            };
+
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `empresatec_export_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+
+            this.showAlert('Dados exportados com sucesso!', 'success');
+
+        } catch (error) {
+            console.error('❌ Erro ao exportar:', error);
+            this.showAlert('Erro ao exportar dados: ' + error.message, 'error');
+        }
+    },
+
+    resetAllData() {
+        if (!confirm('⚠️ ATENÇÃO: Isto irá apagar TODOS os dados! Continuar?')) {
+            return;
+        }
+
+        if (!confirm('🚨 CONFIRMAÇÃO FINAL: Todos os dados serão perdidos!')) {
+            return;
+        }
+
+        try {
+            localStorage.removeItem('empresatec_teams');
+            localStorage.removeItem('empresatec_state');
+
+            this.loadTeamsList();
+            this.updateTeacherStats();
+
+            this.showAlert('🎯 Todos os dados foram resetados!', 'success');
+
+        } catch (error) {
+            console.error('❌ Erro ao resetar:', error);
+            this.showAlert('Erro ao resetar dados: ' + error.message, 'error');
+        }
+    },
+
+    // ===== STORAGE FUNCTIONS =====
+    saveTeam(team) {
+        try {
+            const teams = this.getAllTeams();
+            const existingIndex = teams.findIndex(t => t.code === team.code);
+
+            if (existingIndex >= 0) {
+                teams[existingIndex] = team;
+            } else {
+                teams.push(team);
+            }
+
+            localStorage.setItem('empresatec_teams', JSON.stringify(teams));
+            console.log(`💾 Equipe ${team.code} salva`);
+
+        } catch (error) {
+            console.error('❌ Erro ao salvar equipe:', error);
+            throw error;
+        }
+    },
+
+    findTeam(teamCode) {
+        try {
+            const teams = this.getAllTeams();
+            return teams.find(team => team.code === teamCode) || null;
+
+        } catch (error) {
+            console.error('❌ Erro ao buscar equipe:', error);
+            return null;
+        }
+    },
+
+    getAllTeams() {
+        try {
+            const teamsData = localStorage.getItem('empresatec_teams');
+            return teamsData ? JSON.parse(teamsData) : [];
+
+        } catch (error) {
+            console.error('❌ Erro ao carregar equipes:', error);
+            return [];
+        }
+    },
+
+    saveState() {
+        try {
+            const stateToSave = {
+                ...this.state,
+                // Don't save sensitive data
+                teacherPassword: undefined
+            };
+            localStorage.setItem('empresatec_state', JSON.stringify(stateToSave));
+
+        } catch (error) {
+            console.error('❌ Erro ao salvar estado:', error);
+        }
+    },
+
+    loadState() {
+        try {
+            const savedState = localStorage.getItem('empresatec_state');
+            if (savedState) {
+                const parsedState = JSON.parse(savedState);
+                // Restore state but keep original teacher password
+                const originalPassword = this.state.teacherPassword;
+                Object.assign(this.state, parsedState);
+                this.state.teacherPassword = originalPassword;
+
+                console.log('📂 Estado carregado');
+            }
+
+        } catch (error) {
+            console.error('❌ Erro ao carregar estado:', error);
+        }
+    },
+
+    // ===== UTILITY FUNCTIONS =====
+    generateId() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+    },
+
+    generateTeamCode() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let result = '';
+        for (let i = 0; i < 6; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    },
+
+    isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    },
+
+    formatDate(dateString) {
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
             });
+        } catch (error) {
+            return 'Data inválida';
         }
     },
 
-    checkAllProfilesComplete() {
-        if (!this.state.currentTeam) return;
+    // ===== UI HELPERS =====
+    showAlert(message, type = 'info') {
+        console.log(`${type.toUpperCase()}: ${message}`);
 
-        const completedProfiles = this.state.currentTeam.members.filter(m => m.profile).length;
-        const totalMembers = this.state.currentTeam.members.length;
+        const alertSystem = document.getElementById('alertSystem');
+        const alertContent = document.getElementById('alertContent');
+        const alertIcon = document.getElementById('alertIcon');
+        const alertMessage = document.getElementById('alertMessage');
 
-        const profileProgress = document.getElementById('profileProgress');
-        const continueBtn = document.getElementById('continueToPhase2');
-
-        if (profileProgress) {
-            profileProgress.textContent = `${completedProfiles}/${totalMembers} membros completaram o perfil`;
+        if (!alertSystem || !alertContent || !alertIcon || !alertMessage) {
+            // Fallback to browser alert
+            alert(message);
+            return;
         }
 
-        if (completedProfiles === totalMembers) {
-            const waitingOthers = document.getElementById('waitingOthers');
-            if (waitingOthers) {
-                waitingOthers.innerHTML = '<p>✅ Todos os membros completaram o perfil!</p>';
-            }
+        try {
+            // Icons by type
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
 
-            if (continueBtn) {
-                continueBtn.classList.remove('hidden');
-            }
+            // Update content
+            alertIcon.textContent = icons[type] || icons.info;
+            alertMessage.textContent = message;
+            alertContent.className = `alert-content ${type}`;
+
+            // Show alert
+            alertSystem.classList.remove('hidden');
+
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                this.hideAlert();
+            }, 5000);
+
+        } catch (error) {
+            console.error('❌ Erro ao mostrar alerta:', error);
+            alert(message); // Fallback
         }
     },
+
+    hideAlert() {
+        const alertSystem = document.getElementById('alertSystem');
+        if (alertSystem) {
+            alertSystem.classList.add('hidden');
+        }
+    },
+
+    showLoading(message = 'Carregando...') {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
+
+        if (loadingOverlay) loadingOverlay.classList.remove('hidden');
+        if (loadingText) loadingText.textContent = message;
+
+        console.log(`⏳ ${message}`);
+    },
+
+    hideLoading() {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) loadingOverlay.classList.add('hidden');
+
+        console.log('✅ Loading concluído');
+    },
+
+    // ===== DEBUG HELPERS =====
+    debug() {
+        console.log('🐛 === DEBUG EMPRESATEC ===');
+        console.log('Estado atual:', this.state);
+        console.log('Equipes:', this.getAllTeams());
+
+        return {
+            state: this.state,
+            teams: this.getAllTeams()
+        };
+    },
+
+    clearStorage() {
+        if (confirm('Limpar todos os dados salvos?')) {
+            localStorage.clear();
+            location.reload();
+        }
+    }
+};
+
+// ===== AUTO INITIALIZATION =====
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 EmpresaTec - Sistema Empresarial Educacional');
+    console.log('📅 Data:', new Date().toLocaleString('pt-BR'));
+
+    try {
+        EmpresaTec.init();
+
+        // Make available globally for debugging
+        window.EmpresaTec = EmpresaTec;
+        window.debug = EmpresaTec.debug.bind(EmpresaTec);
+
+        console.log('✅ Sistema inicializado com sucesso!');
+        console.log('🔧 Para debug, use: debug() no console');
+
+    } catch (error) {
+        console.error('❌ Erro crítico na inicialização:', error);
+        alert('Erro ao inicializar sistema. Verifique o console para mais detalhes.');
+    }
+});
+
+// Make globally available
+window.EmpresaTec = EmpresaTec;
