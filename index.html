@@ -1,199 +1,223 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EmpresaTec - Sistema de Simulação Empresarial</title>
-  <link rel="stylesheet" href="style.css" />
-
-  <!-- Firebase SDK (compat) -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
-  <script>
-    // ATENÇÃO: SUBSTITUIR PELAS CREDENCIAIS REAIS DO FIREBASE
-    window.firebaseConfig = {
-  apiKey: "AIzaSyDUBDKmRSc3BRDtez_g4Cd8VRYOGq6f7JQ",
-  authDomain: "simulacao-empresa.firebaseapp.com",
-  projectId: "simulacao-empresa",
-  storageBucket: "simulacao-empresa.firebasestorage.app",
-  messagingSenderId: "454064270255",
-  appId: "1:454064270255:web:f3d65cc4fc6018e1715d5a",
-  measurementId: "G-029B5VNF4M"
-    };
-
-    // Inicializa Firebase se config válida
-    (function initFirebaseCompat(){
-      try {
-        if (window.firebaseConfig && window.firebaseConfig.projectId && typeof firebase !== 'undefined') {
-          const app = firebase.initializeApp(window.firebaseConfig);
-          const db = firebase.firestore();
-          const auth = firebase.auth();
-          window.FB = {
-            app, db, auth,
-            // Firestore helpers
-            doc: (c, id) => db.collection(c).doc(id),
-            set: (ref, data) => ref.set(data),
-            get: (ref) => ref.get(),
-            all: (c) => db.collection(c).get(),
-            del: (ref) => ref.delete(),
-            // Auth helpers
-            signIn: (email, pass) => auth.signInWithEmailAndPassword(email, pass),
-            signUp: (email, pass) => auth.createUserWithEmailAndPassword(email, pass),
-            signOut: () => auth.signOut()
-          };
-          console.log('🔥 Firebase pronto (compat)');
-        } else {
-          console.warn('⚠️ Firebase não configurado. Funcionando em modo local.');
-        }
-      } catch (e) {
-        console.warn('⚠️ Erro ao iniciar Firebase (modo local ativado):', e.message);
-      }
-    })();
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gênesis Empresarial</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 </head>
 <body>
-  <!-- Alert -->
-  <div id="alertSystem" class="alert-system hidden">
-    <div id="alertContent" class="alert-content">
-      <div class="alert-header">
-        <span id="alertIcon" class="alert-icon">ℹ️</span>
-        <button id="alertClose" class="alert-close">&times;</button>
-      </div>
-      <div id="alertMessage" class="alert-message">Mensagem</div>
-    </div>
-  </div>
-
-  <!-- Loading -->
-  <div id="loadingOverlay" class="loading-overlay hidden">
-    <div class="loading-content">
-      <div class="loading-spinner"></div>
-      <div id="loadingText" class="loading-text">Carregando...</div>
-    </div>
-  </div>
-
-  <div class="main-container">
-    <!-- LOGIN -->
-    <div id="loginScreen" class="screen active">
-      <div class="login-container">
-        <div class="brand">
-          <div class="brand-icon">🏢</div>
-          <h1 class="brand-title">EmpresaTec</h1>
-          <p class="brand-subtitle">Sistema de Simulação Empresarial</p>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-gradient flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="loader"></div>
+            <h2 class="mt-4 text-white">Carregando Gênesis Empresarial...</h2>
         </div>
-        <form id="loginForm" class="login-form">
-          <h2>🚀 Entrar</h2>
-          <div class="form-group">
-            <label for="loginEmail">📧 Email</label>
-            <input id="loginEmail" type="email" placeholder="seu.email@exemplo.com" required />
-          </div>
-          <div class="form-group">
-            <label for="loginPassword">🔐 Senha</label>
-            <input id="loginPassword" type="password" placeholder="Digite sua senha" required />
-          </div>
-          <button class="btn btn--primary btn--full" type="submit">Entrar</button>
-          <div class="login-info"><small>Conta criada automaticamente no primeiro acesso.</small></div>
-        </form>
-        <div class="teacher-access"><button id="teacherBtn" class="btn btn--outline">👩‍🏫 Acesso Professor</button></div>
-      </div>
     </div>
 
-    <!-- PROFESSOR -->
-    <div id="teacherScreen" class="screen">
-      <div class="teacher-container">
-        <div class="teacher-login">
-          <h2>👩‍🏫 Painel do Professor</h2>
-          <form id="teacherForm" class="teacher-form">
-            <div class="form-group">
-              <label for="teacherPassword">🔐 Senha do Professor</label>
-              <input id="teacherPassword" type="password" placeholder="professor2025" required />
+    <!-- Main App Container -->
+    <div id="app" class="min-h-screen">
+        <!-- Login Screen -->
+        <div id="login-screen" class="screen active">
+            <div class="container mx-auto px-4 py-8">
+                <div class="max-w-md mx-auto">
+                    <div class="card text-center mb-8">
+                        <div class="card__body">
+                            <h1 class="text-4xl font-bold mb-4 text-primary">Gênesis Empresarial</h1>
+                            <p class="text-lg text-secondary mb-8">Jogo Educacional de Empreendedorismo</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card__body">
+                            <form id="login-form" class="space-y-4">
+                                <div class="form-group">
+                                    <label class="form-label" for="team-name">Nome da Equipe</label>
+                                    <input type="text" id="team-name" class="form-control" placeholder="Digite o nome da sua equipe" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="team-code">Código da Sala (opcional)</label>
+                                    <input type="text" id="team-code" class="form-control" placeholder="Código fornecido pelo professor">
+                                </div>
+                                <button type="submit" class="btn btn--primary btn--full-width">Entrar no Jogo</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <button class="btn btn--primary" type="submit">Acessar</button>
-          </form>
-          <button id="backToLogin" class="btn btn--outline">← Voltar</button>
         </div>
-        <div id="teacherDashboard" class="teacher-dashboard hidden">
-          <div class="dashboard-header">
-            <h1>📊 Dashboard</h1>
-            <div class="dashboard-actions">
-              <button id="exportBtn" class="btn btn--info">📤 Exportar</button>
-              <button id="resetBtn" class="btn btn--danger">🗑️ Reset</button>
-              <button id="logoutTeacher" class="btn btn--outline">🚪 Sair</button>
+
+        <!-- Team Setup Screen -->
+        <div id="team-setup-screen" class="screen">
+            <div class="container mx-auto px-4 py-8">
+                <div class="max-w-2xl mx-auto">
+                    <h2 class="text-3xl font-bold mb-8 text-center">Formação da Equipe</h2>
+                    
+                    <div class="card mb-8">
+                        <div class="card__body">
+                            <h3 class="text-xl font-semibold mb-4">Adicionar Membro</h3>
+                            <div class="space-y-4">
+                                <div class="form-group">
+                                    <label class="form-label" for="member-name">Nome do Membro</label>
+                                    <input type="text" id="member-name" class="form-control" placeholder="Digite o nome do membro">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="member-profile">Perfil do Membro</label>
+                                    <select id="member-profile" class="form-control" style="background-color: var(--color-surface); border: 1px solid var(--color-border);">
+                                        <option value="">Selecione o perfil</option>
+                                        <option value="A">A - Analista (Metódico, organizado e detalhista)</option>
+                                        <option value="I">I - Inovador (Criativo, visionário e inspirador)</option>
+                                        <option value="E">E - Executor (Pragmático, focado e orientado a resultados)</option>
+                                        <option value="C">C - Comunicador (Empático, diplomático e motivador)</option>
+                                    </select>
+                                </div>
+                                
+                                <button type="button" id="add-member-btn" class="btn btn--primary btn--full-width">
+                                    Adicionar Membro
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-8">
+                        <div class="card__header">
+                            <h3 class="text-lg font-semibold">Membros da Equipe</h3>
+                        </div>
+                        <div class="card__body">
+                            <div id="team-members" class="space-y-2">
+                                <p class="text-secondary">Nenhum membro adicionado ainda.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="start-game-btn" class="btn btn--primary btn--full-width" disabled>
+                        Adicione pelo menos 2 membros
+                    </button>
+                </div>
             </div>
-          </div>
-          <div class="stats-grid">
-            <div class="stat-card"><div class="stat-icon">🏢</div><div><div id="totalTeams" class="stat-number">0</div><div class="stat-label">Empresas</div></div></div>
-            <div class="stat-card"><div class="stat-icon">👥</div><div><div id="totalStudents" class="stat-number">0</div><div class="stat-label">Estudantes</div></div></div>
-          </div>
-          <div class="teams-section">
-            <h3>👥 Equipes</h3>
-            <div id="teamsList" class="teams-list"><div class="no-teams">📝 Nenhuma equipe criada ainda</div></div>
-          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- EQUIPES -->
-    <div id="teamScreen" class="screen">
-      <div class="team-container">
-        <div class="user-info">
-          <span id="currentUserName">👤 Usuário</span>
-          <button id="logoutBtn" class="btn btn--outline btn--sm">Sair</button>
-        </div>
-        <div class="team-header"><h2>🏢 Gestão de Empresa</h2><p>Crie uma nova empresa ou entre com um código</p></div>
-        <div class="team-options">
-          <div class="team-option">
-            <h3>🏗️ Criar Empresa</h3>
-            <form id="createTeamForm" class="team-form">
-              <div class="form-group"><label for="companyName">Nome</label><input id="companyName" type="text" required placeholder="Ex: TechStart" /></div>
-              <button class="btn btn--primary" type="submit">Criar</button>
-            </form>
-          </div>
-          <div class="team-option">
-            <h3>🤝 Entrar em Empresa</h3>
-            <form id="joinTeamForm" class="team-form">
-              <div class="form-group"><label for="teamCode">Código</label><input id="teamCode" type="text" maxlength="6" required placeholder="Ex: ABC123" /></div>
-              <button class="btn btn--secondary" type="submit">Entrar</button>
-            </form>
-          </div>
-        </div>
-        <div id="teamStatus" class="team-status hidden">
-          <h3 id="teamName">Empresa</h3>
-          <div class="team-info">
-            <div class="team-code"><span>📋 Código:</span><span id="teamCodeDisplay">------</span><button id="copyBtn" class="btn btn--xs">📋</button></div>
-            <div class="team-members"><h4>👥 Membros</h4><div id="membersList" class="members-list"></div></div>
-          </div>
-          <div id="startSection" class="start-section hidden"><button id="startBtn" class="btn btn--success btn--large">✨ Iniciar Simulação</button></div>
-        </div>
-      </div>
-    </div>
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <!-- Header -->
+            <header class="bg-surface border-b border-card-border sticky top-0 z-40">
+                <div class="container mx-auto px-4 py-4">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-4">
+                            <h1 class="text-xl font-bold">Gênesis Empresarial</h1>
+                            <div class="status status--info">
+                                <span id="current-act">Ato 1</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="text-sm">
+                                <span class="text-secondary">Pontos:</span>
+                                <span id="team-points" class="font-semibold text-primary">0</span>
+                            </div>
+                            <div class="text-sm">
+                                <span class="text-secondary">Dinheiro:</span>
+                                <span id="team-money" class="font-semibold text-success">R$ 100.000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
 
-    <!-- SIMULAÇÃO (ATO 1) -->
-    <div id="simulationScreen" class="screen">
-      <div class="simulation-container">
-        <div class="simulation-header"><div class="sim-info"><span id="simUserName">👤 Usuário</span><span id="simTeamName">🏢 Empresa</span></div><button id="logoutSim" class="btn btn--outline btn--sm">Sair</button></div>
-        <div class="act-info"><h1>🏗️ Ato 1: Fundação</h1><div class="phase-progress"><span>Fase <span id="currentPhase">1</span> de 5</span><div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div></div></div>
-        <div id="phase1" class="phase-container active">
-          <div class="phase-content">
-            <h2>🧠 Perfil Profissional</h2>
-            <p>Responda às perguntas para descobrir seu perfil</p>
-            <div class="questionnaire">
-              <div class="question-progress"><span>Pergunta <span id="currentQ">1</span> de <span id="totalQ">10</span></span><div class="mini-progress"><div id="miniProgressFill" class="mini-progress-fill"></div></div></div>
-              <div class="question-card"><h3 id="questionText">Carregando...</h3><div id="questionOptions" class="question-options"></div></div>
-              <div class="question-nav"><button id="prevBtn" class="btn btn--outline" disabled>← Anterior</button><button id="nextBtn" class="btn btn--primary" disabled>Próxima →</button><button id="finishBtn" class="btn btn--success hidden" disabled>✅ Finalizar</button></div>
-              <div id="profileResult" class="profile-result hidden"><h3>🎯 Seu Perfil</h3><div class="profile-card"><div id="profileIcon" class="profile-icon">🎯</div><h4 id="profileName">Perfil</h4><p id="profileDesc">Descrição do perfil</p><div id="profileStrengths" class="profile-strengths"></div></div><button id="continueBtn" class="btn btn--primary">Continuar →</button></div>
+            <!-- Main Content -->
+            <main class="container mx-auto px-4 py-8">
+                <!-- Act Content Container -->
+                <div id="act-content">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+            </main>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="screen">
+            <div class="container mx-auto px-4 py-8">
+                <div class="max-w-4xl mx-auto">
+                    <h2 class="text-3xl font-bold mb-8 text-center">Relatório Final</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="card">
+                            <div class="card__header">
+                                <h3 class="text-xl font-semibold">Resumo da Performance</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="space-y-4">
+                                    <div class="flex justify-between">
+                                        <span>Pontuação Total:</span>
+                                        <span id="final-points" class="font-bold text-primary">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Dinheiro Final:</span>
+                                        <span id="final-money" class="font-bold text-success">R$ 0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Posição:</span>
+                                        <span id="team-position" class="font-bold">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card__header">
+                                <h3 class="text-xl font-semibold">Análise por Ato</h3>
+                            </div>
+                            <div class="card__body">
+                                <div id="act-analysis" class="space-y-3">
+                                    <!-- Dynamic content -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 text-center">
+                        <button id="restart-game-btn" class="btn btn--secondary mr-4">Jogar Novamente</button>
+                        <button id="share-results-btn" class="btn btn--primary">Compartilhar Resultados</button>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-        <div id="phase2" class="phase-container"><div class="phase-content"><h2>🏭 Segmento</h2><p>Em desenvolvimento...</p><button id="nextPhase2" class="btn btn--primary">Continuar →</button></div></div>
-        <div id="phase3" class="phase-container"><div class="phase-content"><h2>👑 CEO</h2><p>Em desenvolvimento...</p><button id="nextPhase3" class="btn btn--primary">Continuar →</button></div></div>
-        <div id="phase4" class="phase-container"><div class="phase-content"><h2>🏢 Sede</h2><p>Em desenvolvimento...</p><button id="nextPhase4" class="btn btn--primary">Continuar →</button></div></div>
-        <div id="phase5" class="phase-container"><div class="phase-content"><h2>💻 Equipamentos</h2><p>Em desenvolvimento...</p><button id="finishAct" class="btn btn--success">🎉 Finalizar Ato 1</button></div></div>
-      </div>
-    </div>
-  </div>
 
-  <script src="app.js"></script>
+        <!-- Rankings Modal -->
+        <div id="rankings-modal" class="modal hidden">
+            <div class="modal-overlay" onclick="closeModal('rankings-modal')"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="text-xl font-semibold">Ranking Geral</h3>
+                    <button onclick="closeModal('rankings-modal')" class="btn btn--secondary btn--sm">×</button>
+                </div>
+                <div class="modal-body">
+                    <div id="rankings-list" class="space-y-2">
+                        <!-- Dynamic rankings -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Events Modal -->
+        <div id="events-modal" class="modal hidden">
+            <div class="modal-overlay"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="event-title" class="text-xl font-semibold">Evento de Mercado</h3>
+                </div>
+                <div class="modal-body">
+                    <p id="event-description" class="mb-4"></p>
+                    <div id="event-options" class="space-y-2">
+                        <!-- Dynamic options -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>
