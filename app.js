@@ -1,5 +1,5 @@
 /* EmpresaTec - Sistema de Simulação Empresarial */
-/* JavaScript Corrigido - Problema do currentUser resolvido */
+/* JavaScript Completo com Sincronização Real Entre Navegadores */
 
 // ===== CONFIGURAÇÃO GLOBAL =====
 const EmpresaTec = {
@@ -12,6 +12,8 @@ const EmpresaTec = {
         currentPhase: 1,
         isTeacher: false,
         isAuthenticated: false,
+        isOnline: false, // NOVO: status de conexão
+        syncInterval: null, // NOVO: intervalo de sincronização
 
         // Dados do questionário
         currentQuestion: 0,
@@ -32,11 +34,7 @@ const EmpresaTec = {
         // Controles do professor
         teacherPassword: 'professor2025',
         approvedActs: {
-            act1: false,
-            act2: false,
-            act3: false,
-            act4: false,
-            act5: false
+            act1: false, act2: false, act3: false, act4: false, act5: false
         }
     },
 
@@ -332,17 +330,161 @@ const EmpresaTec = {
         }
     },
 
+    // NOVO: Sistema de sincronização
+    sync: {
+        // Método para sincronizar dados
+        async syncData(action, data = null) {
+            console.log(`🔄 Sincronizando: ${action}`);
+
+            try {
+                // Tentar Firebase primeiro
+                if (window.firebase && window.firebase.db) {
+                    return await this.syncWithFirebase(action, data);
+                }
+
+                // Fallback: localStorage
+                return await this.syncWithLocalStorage(action, data);
+
+            } catch (error) {
+                console.warn('⚠️ Erro na sincronização online:', error.message);
+                return await this.syncWithLocalStorage(action, data);
+            }
+        },
+
+        async syncWithFirebase(action, data) {
+            console.log('🔥 Sincronizando com Firebase');
+
+            const db = window.firebase.db;
+
+            switch (action) {
+                case 'saveTeam':
+                    const teamRef = window.firebase.doc(db, 'teams', data.code);
+                    await window.firebase.setDoc(teamRef, {
+                        ...data,
+                        lastUpdated: new Date().toISOString(),
+                        updatedBy: EmpresaTec.state.currentUser?.uid
+                    });
+                    console.log(`✅ Equipe ${data.code} salva no Firebase`);
+                    return data;
+
+                case 'getTeam':
+                    const teamDoc = await window.firebase.getDoc(window.firebase.doc(db, 'teams', data.code));
+                    if (teamDoc.exists()) {
+                        console.log(`✅ Equipe ${data.code} encontrada no Firebase`);
+                        return teamDoc.data();
+                    }
+                    return null;
+
+                case 'getAllTeams':
+                    const teamsCollection = window.firebase.collection(db, 'teams');
+                    const snapshot = await window.firebase.getDocs(teamsCollection);
+                    const teams = {};
+                    snapshot.forEach(doc => {
+                        teams[doc.id] = doc.data();
+                    });
+                    console.log(`✅ ${Object.keys(teams).length} equipes carregadas do Firebase`);
+                    return teams;
+
+                default:
+                    throw new Error(`Ação não suportada: ${action}`);
+            }
+        },
+
+        async syncWithLocalStorage(action, data) {
+            console.log('💾 Usando localStorage');
+
+            const storedTeams = JSON.parse(localStorage.getItem('empresatec_teams') || '{}');
+
+            switch (action) {
+                case 'saveTeam':
+                    storedTeams[data.code] = {
+                        ...data,
+                        lastUpdated: new Date().toISOString(),
+                        isLocal: true
+                    };
+                    localStorage.setItem('empresatec_teams', JSON.stringify(storedTeams));
+                    return data;
+
+                case 'getTeam':
+                    return storedTeams[data.code] || null;
+
+                case 'getAllTeams':
+                    return storedTeams;
+            }
+        }
+    },
+
     // ===== INICIALIZAÇÃO =====
-    init() {
+    async init() {
         console.log('🚀 Iniciando EmpresaTec - Sistema Empresarial Educacional');
 
         this.bindEvents();
+        await this.checkConnectivity();
         this.loadState();
         this.initializeScreen();
+        this.startSyncService();
 
         console.log('✅ Sistema inicializado com sucesso');
     },
 
+    // NOVO: Verificar conectividade
+    async checkConnectivity() {
+        console.log('🔍 Verificando conectividade...');
+
+        try {
+            // Testar Firebase
+            if (window.firebase && window.firebase.db) {
+                await window.firebase.getDocs(window.firebase.collection(window.firebase.db, 'teams'));
+                this.state.isOnline = true;
+                console.log('✅ Firebase conectado');
+                this.showAlert('Sistema online - dados sincronizados!', 'success');
+                return;
+            }
+        } catch (error) {
+            console.warn('⚠️ Firebase não disponível:', error.message);
+        }
+
+        // Fallback: verificar conectividade básica
+        try {
+            const response = await fetch('https://httpbin.org/get', { 
+                method: 'GET'
+            });
+
+            if (response.ok) {
+                this.state.isOnline = false; // Sem Firebase, consideramos offline para sync
+                console.log('🌐 Internet disponível mas sem sincronização');
+                this.showAlert('Sistema funcionando localmente!', 'warning');
+            }
+        } catch (error) {
+            this.state.isOnline = false;
+            console.warn('📴 Sistema funcionando offline');
+            this.showAlert('Sistema offline - dados apenas locais!', 'warning');
+        }
+    },
+
+    // NOVO: Serviço de sincronização contínua
+    startSyncService() {
+        if (this.state.syncInterval) {
+            clearInterval(this.state.syncInterval);
+        }
+
+        // Sincronizar a cada 30 segundos se online
+        this.state.syncInterval = setInterval(async () => {
+            if (this.state.isOnline && this.state.currentTeam) {
+                try {
+                    const updatedTeam = await this.sync.syncData('getTeam', { code: this.state.currentTeam.code });
+                    if (updatedTeam && updatedTeam.lastUpdated !== this.state.currentTeam.lastUpdated) {
+                        console.log('🔄 Equipe atualizada remotamente');
+                        this.state.currentTeam = updatedTeam;
+                        this.showTeamStatus(); // Atualizar interface
+                        this.showAlert('Equipe atualizada!', 'info');
+                    }
+                } catch (error) {
+                    console.warn('⚠️ Erro na sincronização automática:', error.message);
+                }
+            }
+        }, 30000);
+    },
     bindEvents() {
         // Login Form
         const loginForm = document.getElementById('loginForm');
@@ -569,7 +711,8 @@ const EmpresaTec = {
         const currentScore = document.getElementById('currentScore');
 
         if (currentUser && this.state.currentUser) {
-            currentUser.textContent = `👤 ${this.state.currentUser.name}`;
+            const onlineIndicator = this.state.isOnline ? '🟢' : '🔴';
+            currentUser.textContent = `${onlineIndicator} ${this.state.currentUser.name}`;
         }
 
         if (currentTeam && this.state.currentTeam) {
@@ -620,7 +763,7 @@ const EmpresaTec = {
         try {
             this.showLoading('Fazendo login...');
 
-            // CORREÇÃO: Definir currentUser SEMPRE, independentemente do Firebase
+            // CORREÇÃO: Definir currentUser SEMPRE
             this.state.currentUser = {
                 uid: this.generateId(),
                 email: email,
@@ -629,22 +772,18 @@ const EmpresaTec = {
 
             console.log('👤 Usuário definido:', this.state.currentUser);
 
-            // Tentar Firebase se disponível, mas não bloquear se falhar
-            if (window.firebase) {
+            // Tentar Firebase se disponível
+            if (window.firebase && this.state.isOnline) {
                 try {
-                    console.log('🔥 Tentando Firebase...');
                     await window.firebase.signInWithEmailAndPassword(window.firebase.auth, email, password);
                 } catch (authError) {
                     if (authError.code === 'auth/user-not-found') {
-                        console.log('📝 Criando conta no Firebase...');
                         await window.firebase.createUserWithEmailAndPassword(window.firebase.auth, email, password);
                         this.showAlert('Conta criada automaticamente!', 'success');
                     } else {
                         console.warn('⚠️ Firebase erro:', authError.message);
                     }
                 }
-            } else {
-                console.log('💾 Usando autenticação local');
             }
 
             // SEMPRE definir como autenticado
@@ -655,12 +794,6 @@ const EmpresaTec = {
 
             this.hideLoading();
             this.showAlert('Login realizado com sucesso!', 'success');
-
-            console.log('✅ Login completado. Estado atual:', {
-                currentUser: this.state.currentUser,
-                isAuthenticated: this.state.isAuthenticated,
-                currentTeam: this.state.currentTeam
-            });
 
             // Determinar próxima tela
             if (this.state.currentTeam) {
@@ -678,16 +811,13 @@ const EmpresaTec = {
     },
 
     async loadUserData() {
-        if (!this.state.currentUser) {
-            console.warn('⚠️ Tentativa de carregar dados sem currentUser definido');
-            return;
-        }
+        if (!this.state.currentUser) return;
 
         try {
             console.log('📂 Carregando dados do usuário:', this.state.currentUser.uid);
 
             // Carregar dados do Firebase se disponível
-            if (window.firebase && window.firebase.db) {
+            if (window.firebase && this.state.isOnline && window.firebase.db) {
                 try {
                     const userRef = window.firebase.doc(window.firebase.db, 'users', this.state.currentUser.uid);
                     const userSnap = await window.firebase.getDoc(userRef);
@@ -704,7 +834,7 @@ const EmpresaTec = {
                 }
             }
 
-            console.log('✅ Dados do usuário carregados com sucesso');
+            console.log('✅ Dados do usuário carregados');
         } catch (error) {
             console.warn('⚠️ Não foi possível carregar dados do servidor:', error.message);
         }
@@ -731,7 +861,7 @@ const EmpresaTec = {
         this.state.isTeacher = true;
         this.state.isAuthenticated = true;
 
-        // CORREÇÃO: Definir currentUser para professor também
+        // Definir currentUser para professor
         if (!this.state.currentUser) {
             this.state.currentUser = {
                 uid: 'professor',
@@ -762,6 +892,12 @@ const EmpresaTec = {
                 window.firebase.signOut(window.firebase.auth);
             }
 
+            // Parar sincronização
+            if (this.state.syncInterval) {
+                clearInterval(this.state.syncInterval);
+                this.state.syncInterval = null;
+            }
+
             // Reset estado local
             this.state = {
                 ...this.state,
@@ -784,11 +920,10 @@ const EmpresaTec = {
         }
     },
 
-    // ===== GESTÃO DE EQUIPES - CORRIGIDA =====
-    createTeam() {
+    // ===== GESTÃO DE EQUIPES - COM SINCRONIZAÇÃO =====
+    async createTeam() {
         console.log('🏗️ Iniciando criação de equipe...');
 
-        // CORREÇÃO: Verificar se currentUser está definido
         if (!this.state.currentUser) {
             console.error('❌ currentUser é null!');
             this.showAlert('Erro: usuário não autenticado. Faça login novamente.', 'error');
@@ -809,15 +944,9 @@ const EmpresaTec = {
         }
 
         try {
-            this.showLoading('Criando empresa...');
+            this.showLoading('Criando empresa e sincronizando...');
 
             const teamCode = this.generateTeamCode();
-
-            console.log('👥 Criando equipe com dados:', {
-                currentUser: this.state.currentUser,
-                companyName: companyName,
-                teamCode: teamCode
-            });
 
             const newTeam = {
                 id: teamCode,
@@ -833,21 +962,29 @@ const EmpresaTec = {
                     profile: null
                 }],
                 createdAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString(),
                 status: 'forming',
                 currentAct: 1,
                 currentPhase: 1,
                 score: 0,
-                decisions: {}
+                decisions: {},
+                updatedBy: this.state.currentUser.uid
             };
 
-            this.state.currentTeam = newTeam;
-            this.saveTeamToDatabase(newTeam);
+            // CORREÇÃO: Salvar com sincronização
+            const savedTeam = await this.sync.syncData('saveTeam', newTeam);
+            this.state.currentTeam = savedTeam;
 
             this.hideLoading();
-            this.showAlert(`Empresa "${companyName}" criada com sucesso!`, 'success');
+
+            const statusMsg = this.state.isOnline ? 
+                `Empresa "${companyName}" criada e sincronizada! Código: ${teamCode}` :
+                `Empresa "${companyName}" criada localmente! Código: ${teamCode}`;
+
+            this.showAlert(statusMsg, 'success');
             this.showTeamStatus();
 
-            console.log('✅ Equipe criada com sucesso:', newTeam);
+            console.log('✅ Equipe criada:', newTeam);
 
         } catch (error) {
             this.hideLoading();
@@ -856,10 +993,9 @@ const EmpresaTec = {
         }
     },
 
-    joinTeam() {
+    async joinTeam() {
         console.log('🤝 Iniciando entrada em equipe...');
 
-        // CORREÇÃO: Verificar se currentUser está definido
         if (!this.state.currentUser) {
             console.error('❌ currentUser é null!');
             this.showAlert('Erro: usuário não autenticado. Faça login novamente.', 'error');
@@ -880,16 +1016,27 @@ const EmpresaTec = {
         }
 
         try {
-            this.showLoading('Entrando na empresa...');
+            this.showLoading('Buscando empresa...');
 
-            // Simular busca da equipe (seria Firebase na versão completa)
-            const team = this.findTeamByCode(teamCode);
+            console.log('🔍 Buscando equipe com código:', teamCode);
+
+            // CORREÇÃO: Buscar com sincronização
+            const team = await this.sync.syncData('getTeam', { code: teamCode });
 
             if (!team) {
                 this.hideLoading();
-                this.showAlert('Empresa não encontrada.', 'error');
+                const errorMsg = this.state.isOnline ? 
+                    `Empresa ${teamCode} não encontrada online. Verifique o código.` :
+                    `Empresa ${teamCode} não encontrada localmente.`;
+                console.log('❌ Equipe não encontrada:', {
+                    codigo: teamCode,
+                    online: this.state.isOnline
+                });
+                this.showAlert(errorMsg, 'error');
                 return;
             }
+
+            console.log('✅ Equipe encontrada:', team.name);
 
             // Verificar se já é membro
             const existingMember = team.members.find(m => m.uid === this.state.currentUser.uid);
@@ -919,8 +1066,12 @@ const EmpresaTec = {
             };
 
             team.members.push(newMember);
-            this.state.currentTeam = team;
-            this.saveTeamToDatabase(team);
+            team.lastUpdated = new Date().toISOString();
+            team.updatedBy = this.state.currentUser.uid;
+
+            // CORREÇÃO: Salvar com sincronização
+            const updatedTeam = await this.sync.syncData('saveTeam', team);
+            this.state.currentTeam = updatedTeam;
 
             this.hideLoading();
             this.showAlert(`Bem-vindo à ${team.name}!`, 'success');
@@ -932,39 +1083,8 @@ const EmpresaTec = {
             this.showAlert('Erro ao entrar na empresa: ' + error.message, 'error');
         }
     },
-    findTeamByCode(code) {
-        // Em uma implementação real, seria uma consulta ao Firebase
-        // Por agora, retorna null para códigos não encontrados
-        const storedTeams = JSON.parse(localStorage.getItem('empresatec_teams') || '{}');
-        return storedTeams[code] || null;
-    },
 
-    saveTeamToDatabase(team) {
-        try {
-            console.log('💾 Salvando equipe:', team.code);
-
-            // Salvar no Firebase se disponível
-            if (window.firebase && window.firebase.db) {
-                try {
-                    const teamRef = window.firebase.doc(window.firebase.db, 'teams', team.code);
-                    window.firebase.setDoc(teamRef, team);
-                    console.log('🔥 Equipe salva no Firebase');
-                } catch (firebaseError) {
-                    console.warn('⚠️ Erro Firebase (não crítico):', firebaseError.message);
-                }
-            }
-
-            // Salvar localmente como fallback
-            const storedTeams = JSON.parse(localStorage.getItem('empresatec_teams') || '{}');
-            storedTeams[team.code] = team;
-            localStorage.setItem('empresatec_teams', JSON.stringify(storedTeams));
-
-            console.log(`✅ Equipe ${team.code} salva com sucesso`);
-        } catch (error) {
-            console.error('❌ Erro ao salvar equipe:', error);
-        }
-    },
-
+    // CORREÇÃO: Status da equipe com indicador online
     showTeamStatus() {
         const teamStatus = document.getElementById('teamStatus');
         const teamName = document.getElementById('teamName');
@@ -978,8 +1098,12 @@ const EmpresaTec = {
         // Mostrar seção de status
         if (teamStatus) teamStatus.classList.remove('hidden');
 
-        // Nome da equipe
-        if (teamName) teamName.textContent = this.state.currentTeam.name;
+        // Nome da equipe com indicador online
+        if (teamName) {
+            const onlineIndicator = this.state.isOnline ? '🟢' : '🔴';
+            const statusText = this.state.isOnline ? 'Online' : 'Offline';
+            teamName.innerHTML = `${this.state.currentTeam.name} <small>${onlineIndicator} ${statusText}</small>`;
+        }
 
         // Código da equipe
         if (teamCodeDisplay) teamCodeDisplay.textContent = this.state.currentTeam.code;
@@ -1003,14 +1127,16 @@ const EmpresaTec = {
         if (teamWaiting) {
             if (memberCount < 3) {
                 teamWaiting.classList.remove('hidden');
-                teamWaiting.querySelector('p').textContent = 
-                    `⏳ Aguardando mais membros... (${memberCount}/3 mínimo)`;
+                const syncStatus = this.state.isOnline ? 
+                    'Aguardando mais membros entrarem online...' : 
+                    'Aguardando mais membros (modo offline)...';
+                teamWaiting.querySelector('p').textContent = `⏳ ${syncStatus} (${memberCount}/3 mínimo)`;
             } else {
                 teamWaiting.classList.add('hidden');
             }
         }
 
-        // Botão de iniciar - CORREÇÃO: verificar se currentUser existe
+        // Botão de iniciar
         if (startGameSection && this.state.currentUser && memberCount >= 3) {
             const isLeader = this.state.currentTeam.leader === this.state.currentUser.uid;
             if (isLeader) {
@@ -1263,12 +1389,13 @@ const EmpresaTec = {
 
             this.displayProfileResult(profile);
 
-            // Atualizar perfil do membro na equipe - CORREÇÃO: verificar se existe currentUser e currentTeam
+            // Atualizar perfil do membro na equipe
             if (this.state.currentTeam && this.state.currentUser) {
                 const member = this.state.currentTeam.members.find(m => m.uid === this.state.currentUser.uid);
                 if (member) {
                     member.profile = profile;
-                    this.saveTeamToDatabase(this.state.currentTeam);
+                    // Salvar com sincronização
+                    this.sync.syncData('saveTeam', this.state.currentTeam);
                 }
             }
 
@@ -1365,523 +1492,3 @@ const EmpresaTec = {
             }
         }
     },
-
-    // ===== RESTO DAS FASES (simplificado para o exemplo) =====
-    loadSegmentSelection() {
-        console.log('🏭 Carregando seleção de segmento');
-        // Implementação simplificada - funcionalidades já incluídas no código anterior
-    },
-
-    loadCeoElection() {
-        console.log('👑 Carregando eleição de CEO');
-        // Implementação simplificada
-    },
-
-    loadLocationSelection() {
-        console.log('🏢 Carregando seleção de localização');
-        // Implementação simplificada
-    },
-
-    loadEquipmentSelection() {
-        console.log('💻 Carregando seleção de equipamentos');
-        // Implementação simplificada
-    },
-
-    // ===== SISTEMA DO PROFESSOR =====
-    loadTeacherDashboard() {
-        console.log('👩‍🏫 Carregando dashboard do professor');
-
-        this.updateTeacherStats();
-        this.loadTeamsMonitor();
-        this.updateApprovalButtons();
-    },
-
-    updateTeacherStats() {
-        const totalCompanies = document.getElementById('totalCompanies');
-        const totalStudents = document.getElementById('totalStudents');
-        const currentAct = document.getElementById('currentAct');
-        const completedTeams = document.getElementById('completedTeams');
-
-        // Simular estatísticas (seria baseado em dados reais do Firebase)
-        const stats = this.getTeacherStats();
-
-        if (totalCompanies) totalCompanies.textContent = stats.totalTeams;
-        if (totalStudents) totalStudents.textContent = stats.totalStudents;
-        if (currentAct) currentAct.textContent = stats.currentAct;
-        if (completedTeams) completedTeams.textContent = stats.completedTeams;
-    },
-
-    getTeacherStats() {
-        const storedTeams = JSON.parse(localStorage.getItem('empresatec_teams') || '{}');
-        const teams = Object.values(storedTeams);
-
-        return {
-            totalTeams: teams.length,
-            totalStudents: teams.reduce((sum, team) => sum + (team.members?.length || 0), 0),
-            currentAct: 1,
-            completedTeams: teams.filter(team => team.act1Completed).length
-        };
-    },
-
-    loadTeamsMonitor() {
-        const teamsMonitor = document.getElementById('teamsMonitor');
-        if (!teamsMonitor) return;
-
-        const storedTeams = JSON.parse(localStorage.getItem('empresatec_teams') || '{}');
-        const teams = Object.values(storedTeams);
-
-        if (teams.length === 0) {
-            teamsMonitor.innerHTML = '<div class="loading-message">📝 Nenhuma empresa criada ainda</div>';
-            return;
-        }
-
-        teamsMonitor.innerHTML = '';
-
-        teams.forEach(team => {
-            const teamCard = document.createElement('div');
-            teamCard.className = 'team-card';
-
-            const status = team.act1Completed ? '✅ Ato 1 Completo' : '🔄 Em Andamento';
-            const score = team.act1Score || 0;
-
-            teamCard.innerHTML = `
-                <h4>${team.name}</h4>
-                <div class="team-info">
-                    <div class="info-item">
-                        <strong>Código:</strong> <span>${team.code}</span>
-                    </div>
-                    <div class="info-item">
-                        <strong>👥 Membros:</strong> <span>${team.members?.length || 0}</span>
-                    </div>
-                    <div class="info-item">
-                        <strong>📊 Status:</strong> <span>${status}</span>
-                    </div>
-                    <div class="info-item">
-                        <strong>🏆 Pontuação:</strong> <span>${score.toLocaleString()}</span>
-                    </div>
-                    <div class="info-item">
-                        <strong>🕒 Criada:</strong> <span>${this.formatDate(team.createdAt)}</span>
-                    </div>
-                </div>
-                <div class="team-actions">
-                    <button class="btn btn--xs btn--outline" onclick="EmpresaTec.viewTeamDetails('${team.code}')">
-                        👁️ Detalhes
-                    </button>
-                    <button class="btn btn--xs btn--danger" onclick="EmpresaTec.resetTeam('${team.code}')">
-                        🗑️ Reset
-                    </button>
-                </div>
-            `;
-
-            teamsMonitor.appendChild(teamCard);
-        });
-    },
-
-    updateApprovalButtons() {
-        const acts = [1, 2, 3, 4, 5];
-
-        acts.forEach(actNumber => {
-            const btn = document.getElementById(`approveAct${actNumber}`);
-            if (btn) {
-                const isApproved = this.state.approvedActs[`act${actNumber}`];
-                btn.disabled = isApproved;
-                btn.textContent = isApproved ? `✅ Ato ${actNumber} Aprovado` : `✅ Aprovar Ato ${actNumber}`;
-
-                // Só habilitar próximo ato se anterior foi aprovado
-                if (actNumber > 1) {
-                    const prevApproved = this.state.approvedActs[`act${actNumber-1}`];
-                    if (!prevApproved && !isApproved) {
-                        btn.disabled = true;
-                        btn.textContent = `🔒 Ato ${actNumber} (Bloqueado)`;
-                    }
-                }
-            }
-        });
-    },
-
-    handleTeacherAction(actionId) {
-        console.log(`🎯 Ação do professor: ${actionId}`);
-
-        switch (actionId) {
-            case 'approveAct1':
-            case 'approveAct2':
-            case 'approveAct3':
-            case 'approveAct4':
-            case 'approveAct5':
-                const actNumber = actionId.slice(-1);
-                this.approveAct(parseInt(actNumber));
-                break;
-
-            case 'showRanking':
-                this.showRanking();
-                break;
-
-            case 'exportData':
-                this.exportData();
-                break;
-
-            case 'generateReport':
-                this.generateReport();
-                break;
-
-            case 'resetAllData':
-                this.resetAllData();
-                break;
-
-            case 'backupData':
-                this.backupData();
-                break;
-
-            case 'backToSimulation':
-                this.backToSimulation();
-                break;
-
-            case 'teacherLogout':
-                this.handleLogout();
-                break;
-        }
-    },
-
-    approveAct(actNumber) {
-        if (!confirm(`Aprovar Ato ${actNumber}? Isto permitirá que as equipes avancem.`)) {
-            return;
-        }
-
-        try {
-            this.showLoading(`Aprovando Ato ${actNumber}...`);
-
-            this.state.approvedActs[`act${actNumber}`] = true;
-
-            // Salvar no localStorage
-            localStorage.setItem('empresatec_approvals', JSON.stringify(this.state.approvedActs));
-
-            this.updateApprovalButtons();
-
-            this.hideLoading();
-            this.showAlert(`Ato ${actNumber} aprovado! Equipes podem avançar.`, 'success');
-
-        } catch (error) {
-            this.hideLoading();
-            console.error(`❌ Erro ao aprovar ato ${actNumber}:`, error);
-            this.showAlert(`Erro ao aprovar ato: ${error.message}`, 'error');
-        }
-    },
-
-    showRanking() {
-        this.showAlert('Ranking em desenvolvimento!', 'info');
-    },
-
-    exportData() {
-        try {
-            const storedTeams = JSON.parse(localStorage.getItem('empresatec_teams') || '{}');
-            const exportData = {
-                timestamp: new Date().toISOString(),
-                teams: storedTeams,
-                approvals: this.state.approvedActs
-            };
-
-            const dataStr = JSON.stringify(exportData, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `empresatec_export_${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-
-            this.showAlert('Dados exportados com sucesso!', 'success');
-
-        } catch (error) {
-            console.error('❌ Erro ao exportar:', error);
-            this.showAlert('Erro ao exportar dados: ' + error.message, 'error');
-        }
-    },
-
-    generateReport() {
-        this.showAlert('Relatório detalhado em desenvolvimento!', 'info');
-    },
-
-    resetAllData() {
-        if (!confirm('⚠️ ATENÇÃO: Isto irá apagar TODOS os dados das equipes! Continuar?')) {
-            return;
-        }
-
-        try {
-            // Limpar todos os dados
-            localStorage.removeItem('empresatec_teams');
-            localStorage.removeItem('empresatec_approvals');
-            localStorage.removeItem('empresatec_state');
-
-            // Reset estado
-            this.state.approvedActs = {
-                act1: false, act2: false, act3: false, act4: false, act5: false
-            };
-
-            this.updateApprovalButtons();
-            this.loadTeamsMonitor();
-
-            this.showAlert('🎯 Todos os dados foram resetados!', 'success');
-
-        } catch (error) {
-            console.error('❌ Erro ao resetar:', error);
-            this.showAlert('Erro ao resetar dados: ' + error.message, 'error');
-        }
-    },
-
-    backupData() {
-        this.exportData(); // Mesmo que exportar por agora
-    },
-
-    backToSimulation() {
-        if (this.state.currentUser && !this.state.isTeacher) {
-            if (this.state.currentTeam) {
-                this.showScreen('act1Screen');
-            } else {
-                this.showScreen('teamScreen');
-            }
-        } else {
-            this.showScreen('loginScreen');
-        }
-    },
-
-    viewTeamDetails(teamCode) {
-        const storedTeams = JSON.parse(localStorage.getItem('empresatec_teams') || '{}');
-        const team = storedTeams[teamCode];
-
-        if (!team) {
-            this.showAlert('Equipe não encontrada.', 'error');
-            return;
-        }
-
-        const details = `
-Empresa: ${team.name}
-Código: ${team.code}
-Membros: ${team.members.length}
-
-Status: ${team.act1Completed ? 'Ato 1 Completo' : 'Em andamento'}
-Pontuação: ${team.act1Score || 0}
-
-Criada em: ${this.formatDate(team.createdAt)}
-
-Membros:
-${team.members.map(m => `• ${m.name} ${m.isLeader ? '(Líder)' : ''}`).join('\n')}
-        `;
-
-        alert(details);
-    },
-
-    resetTeam(teamCode) {
-        if (!confirm(`Resetar empresa ${teamCode}? Esta ação não pode ser desfeita.`)) {
-            return;
-        }
-
-        try {
-            const storedTeams = JSON.parse(localStorage.getItem('empresatec_teams') || '{}');
-            delete storedTeams[teamCode];
-            localStorage.setItem('empresatec_teams', JSON.stringify(storedTeams));
-
-            this.loadTeamsMonitor();
-            this.updateTeacherStats();
-
-            this.showAlert(`Empresa ${teamCode} resetada!`, 'success');
-
-        } catch (error) {
-            console.error('❌ Erro ao resetar equipe:', error);
-            this.showAlert('Erro ao resetar equipe: ' + error.message, 'error');
-        }
-    },
-
-    // Adicionar métodos restantes que estavam faltando
-    submitSegmentVote() {
-        this.showAlert('Votação em desenvolvimento!', 'info');
-    },
-
-    submitCeoVote() {
-        this.showAlert('Eleição em desenvolvimento!', 'info');
-    },
-
-    confirmLocation() {
-        this.showAlert('Seleção de localização em desenvolvimento!', 'info');
-    },
-
-    finishAct1() {
-        this.showAlert('Finalização do Ato 1 em desenvolvimento!', 'info');
-    },
-
-    closeRanking() {
-        this.showScreen('teacherScreen');
-    },
-
-    // ===== UTILITÁRIOS =====
-    generateId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
-    },
-
-    generateTeamCode() {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let result = '';
-        for (let i = 0; i < 6; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return result;
-    },
-
-    isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    },
-
-    formatDate(dateString) {
-        if (!dateString) return 'N/A';
-
-        try {
-            const date = new Date(dateString);
-            return date.toLocaleString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        } catch (error) {
-            return 'N/A';
-        }
-    },
-
-    saveState() {
-        try {
-            const stateToSave = {
-                ...this.state,
-                // Não salvar dados sensíveis
-                teacherPassword: undefined
-            };
-            localStorage.setItem('empresatec_state', JSON.stringify(stateToSave));
-            console.log('💾 Estado salvo');
-        } catch (error) {
-            console.error('❌ Erro ao salvar estado:', error);
-        }
-    },
-
-    loadState() {
-        try {
-            const saved = localStorage.getItem('empresatec_state');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                // Restaurar estado mas manter senha original
-                const originalPassword = this.state.teacherPassword;
-                Object.assign(this.state, parsed);
-                this.state.teacherPassword = originalPassword;
-                console.log('📂 Estado carregado');
-            }
-
-            // Carregar aprovações
-            const approvals = localStorage.getItem('empresatec_approvals');
-            if (approvals) {
-                this.state.approvedActs = JSON.parse(approvals);
-            }
-        } catch (error) {
-            console.error('❌ Erro ao carregar estado:', error);
-        }
-    },
-
-    initializeScreen() {
-        // Determinar tela inicial baseada no estado
-        if (this.state.isAuthenticated && this.state.currentUser) {
-            if (this.state.isTeacher) {
-                this.showTeacherLogin();
-            } else if (this.state.currentTeam) {
-                this.showScreen('act1Screen');
-                this.loadAct1();
-            } else {
-                this.showScreen('teamScreen');
-            }
-        } else {
-            this.showScreen('loginScreen');
-        }
-    },
-
-    loadAct1() {
-        // Carregar Ato 1 baseado na fase atual
-        this.goToPhase(this.state.currentPhase);
-    },
-
-    showAlert(message, type = 'info') {
-        const alertSystem = document.getElementById('alertSystem');
-        const alertIcon = document.getElementById('alertIcon');
-        const alertMessage = document.getElementById('alertMessage');
-        const alertContent = document.getElementById('alertContent');
-
-        if (!alertSystem || !alertIcon || !alertMessage || !alertContent) {
-            // Fallback para alert nativo
-            console.log(`Alert: ${message}`);
-            alert(message);
-            return;
-        }
-
-        // Ícones por tipo
-        const icons = {
-            success: '✅',
-            error: '❌',
-            warning: '⚠️',
-            info: 'ℹ️'
-        };
-
-        // Atualizar conteúdo
-        alertIcon.textContent = icons[type] || icons.info;
-        alertMessage.textContent = message;
-
-        // Atualizar classe do tipo
-        alertContent.className = `alert-content ${type}`;
-
-        // Mostrar alerta
-        alertSystem.classList.remove('hidden');
-
-        // Auto-fechar após 5 segundos
-        setTimeout(() => {
-            alertSystem.classList.add('hidden');
-        }, 5000);
-
-        // Botão de fechar
-        const alertClose = document.getElementById('alertClose');
-        if (alertClose) {
-            alertClose.onclick = () => {
-                alertSystem.classList.add('hidden');
-            };
-        }
-
-        console.log(`${icons[type]} ${message}`);
-    },
-
-    showLoading(message = 'Carregando...') {
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const loadingText = document.getElementById('loadingText');
-
-        if (loadingOverlay) loadingOverlay.classList.remove('hidden');
-        if (loadingText) loadingText.textContent = message;
-
-        console.log(`⏳ ${message}`);
-    },
-
-    hideLoading() {
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        if (loadingOverlay) loadingOverlay.classList.add('hidden');
-
-        console.log('✅ Loading concluído');
-    }
-};
-
-// ===== INICIALIZAÇÃO AUTOMÁTICA =====
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 EmpresaTec - Sistema Empresarial Educacional');
-    console.log('📅 Data:', new Date().toLocaleString('pt-BR'));
-
-    try {
-        EmpresaTec.init();
-        console.log('✅ Sistema inicializado com sucesso!');
-    } catch (error) {
-        console.error('❌ Erro na inicialização:', error);
-        alert('Erro ao inicializar sistema: ' + error.message);
-    }
-});
-
-// Disponibilizar globalmente para callbacks
-window.EmpresaTec = EmpresaTec;
