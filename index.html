@@ -330,5 +330,72 @@ const app = initializeApp(firebaseConfig);
 window.firebaseAuth = getAuth(app);
 window.firebaseDB = getFirestore(app);
 </script>
+
+<!-- SISTEMA DE LOGOUT COMPLETO -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Aguardar Firebase carregar
+    setTimeout(() => {
+        const logoutBtn = document.getElementById('logoutBtn');
+        const logoutContainer = document.getElementById('logoutContainer');
+        const userEmail = document.getElementById('userEmail');
+        
+        // Função de logout
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    logoutBtn.disabled = true;
+                    logoutBtn.innerHTML = 'Saindo...';
+                    
+                    // Logout Firebase (se disponível)
+                    if (window.firebaseAuth && window.firebaseUtils) {
+                        await window.firebaseUtils.signOut(window.firebaseAuth);
+                    }
+                    
+                    // Limpar dados locais
+                    localStorage.clear();
+                    
+                    // Feedback e redirecionamento
+                    alert('Logout realizado com sucesso!');
+                    window.location.reload();
+                    
+                } catch (error) {
+                    console.error('Erro logout:', error);
+                    alert('Erro: ' + error.message);
+                    logoutBtn.disabled = false;
+                    logoutBtn.innerHTML = 'Sair';
+                }
+            });
+        }
+
+        // Monitor de autenticação (funciona com ou sem Firebase)
+        function checkAuthState() {
+            // Se Firebase disponível
+            if (window.firebaseAuth && window.firebaseUtils) {
+                window.firebaseUtils.onAuthStateChanged(window.firebaseAuth, (user) => {
+                    if (user && logoutContainer) {
+                        logoutContainer.classList.remove('hidden');
+                        if (userEmail) userEmail.textContent = user.email;
+                    } else if (logoutContainer) {
+                        logoutContainer.classList.add('hidden');
+                    }
+                });
+            } 
+            // Fallback simples
+            else {
+                const savedEmail = localStorage.getItem('userEmail');
+                if (savedEmail && logoutContainer) {
+                    logoutContainer.classList.remove('hidden');
+                    if (userEmail) userEmail.textContent = savedEmail;
+                }
+            }
+        }
+        
+        checkAuthState();
+        
+    }, 1000); // Aguarda 1 segundo para Firebase carregar
+});
+</script>
+    
 </body>
 </html>
